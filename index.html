@@ -1,0 +1,1815 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BRC-8888 — Universal Object Protocol (v1)</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='black'/><text x='50' y='75' font-size='70' text-anchor='middle' fill='white'>₿</text></svg>" />
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+<style>
+/* THEME & LAYOUT (BOLDER + LARGER, ENHANCED MOBILE) */
+:root{
+  --bg-dark:#04131a; --panel-dark:#071826; --accent-dark:#00f5a0; --muted-dark:#9fefd8; --muted2-dark:#bfeee0;
+  --bg-light:#f5f7fb; --panel-light:#ffffff; --accent-light:#006b4f; --muted-light:#0b3426; --muted2-light:#1b513f;
+  --mono: ui-monospace, "Roboto Mono", "Courier New", monospace;
+  --glass: rgba(255,255,255,0.03);
+  --base-font:16px;
+  --error-red: #ff4d4d; /* For validation errors */
+}
+html,body{height:100%;margin:0;font-family:var(--mono);-webkit-font-smoothing:antialiased;font-size:var(--base-font)}
+body[data-theme="dark"]{
+  background:
+    radial-gradient(900px 440px at 8% 10%, rgba(0,0,245,0.03), transparent),
+    linear-gradient(180deg,#021018 0%, var(--bg-dark) 100%);
+  color:var(--muted-dark);
+}
+body[data-theme="light"]{
+  background:linear-gradient(180deg,#f7fafc 0%, var(--bg-light) 100%);
+  color:var(--muted-light);
+}
+.wrap{max-width:1280px;margin:20px auto;padding:20px;display:grid;grid-template-columns:300px 1fr;gap:20px}
+.panel{border-radius:12px;padding:20px;border:1px solid rgba(0,0,0,0.06);box-shadow:0 12px 36px rgba(0,0,0,0.32);background:var(--panel-dark)}
+body[data-theme="light"] .panel{background:var(--panel-light);border-color:rgba(0,0,0,0.04);box-shadow:0 8px 26px rgba(0,0,0,0.06)}
+.sidebar{padding:18px}
+/* IMPROVED HEADER STYLING */
+.brand-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.brand{font-size:20px;color:var(--accent-dark);font-weight:900;letter-spacing:0.6px;line-height:1.2}
+body[data-theme="light"] .brand{color:var(--accent-light)}
+.subtitle{font-size:13px;margin-top:4px;opacity:.95;line-height:1.3}
+.creator-signature {
+  font-size: 12px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(0,245,160,0.05);
+  border: 1px solid rgba(0,245,160,0.1);
+  color: var(--accent-dark);
+  font-weight: 700;
+  text-align: center;
+}
+body[data-theme="light"] .creator-signature {
+  background: rgba(0,107,79,0.05);
+  border: 1px solid rgba(0,107,79,0.1);
+  color: var(--accent-light);
+}
+/* LEFT-JUSTIFIED MOBILE-RESPONSIVE NAVIGATION */
+.nav{margin-top:18px;display:flex;flex-direction:column;gap:10px}
+.nav button{
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.03);
+  padding:14px;
+  text-align:left; /* LEFT JUSTIFIED */
+  border-radius:10px;
+  color:inherit;
+  cursor:pointer;
+  font-weight:900;
+  font-size:15px;
+  transition:all .12s;
+  width:100%
+}
+body[data-theme="dark"] .nav button:hover {
+  background: var(--accent-dark);
+  color: var(--bg-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+body[data-theme="light"] .nav button:hover {
+  background: var(--accent-light);
+  color: var(--bg-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.nav button.active{
+  background:linear-gradient(90deg, rgba(0,245,160,0.07), rgba(0,245,160,0.03));
+  color:var(--accent-dark);
+  box-shadow:0 8px 22px rgba(0,245,160,0.03)
+}
+body[data-theme="light"] .nav button.active{
+  background:linear-gradient(90deg, rgba(0,107,79,0.05), rgba(0,107,79,0.02));
+  color:var(--accent-light)
+}
+.tiny{font-size:13px;color:rgba(255,255,255,0.30)}
+body[data-theme="light"] .tiny{color:rgba(0,0,0,0.55)}
+.header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.h-title{font-size:18px;font-weight:900;color:var(--accent-dark)}
+body[data-theme="light"] .h-title{color:var(--accent-light)}
+.h-sub{font-size:13px;color:rgba(255,255,255,0.30)}
+body[data-theme="light"] .h-sub{color:rgba(0,0,0,0.55)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:16px;align-items:start}
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0; /* Prevent overflow in grid */
+}
+.json-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0; /* Prevent overflow in grid */
+}
+/* Ensure uniform width and prevent JSON from overflowing */
+pre.output {
+  background:#001219;
+  padding:16px;
+  border-radius:10px;
+  color:#cfeee0;
+  overflow:auto;
+  height:380px;
+  white-space:pre-wrap;
+  border:1px solid rgba(255,255,255,0.02);
+  font-size:14px;
+  font-weight:900;
+  margin:0;
+  word-break:break-all; /* Break long lines in JSON */
+  max-width:100%; /* Constrain to container */
+  box-sizing:border-box;
+}
+body[data-theme="light"] pre.output {
+  background:#f3faf6;
+  color:var(--muted-light);
+  border:1px solid rgba(0,0,0,0.04);
+}
+/* RESPONSIVE DESIGN - IMPROVED */
+@media (max-width: 1080px) {
+  .wrap {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 16px;
+  }
+ 
+  .grid-2 {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+ 
+  .sidebar {
+    order: 1;
+  }
+ 
+  main {
+    order: 2;
+  }
+  pre.output {
+    height: auto; /* Auto height on smaller screens to avoid excessive scrolling */
+    min-height: 200px;
+  }
+}
+@media (max-width: 768px) {
+  :root {
+    --base-font: 15px;
+  }
+ 
+  .wrap {
+    padding: 12px;
+    gap: 12px;
+  }
+ 
+  .panel {
+    padding: 16px;
+  }
+ 
+  .grid-2 {
+    gap: 16px;
+  }
+ 
+  /* Mobile navigation - stays vertical with left alignment */
+  .nav {
+    flex-direction: column;
+  }
+ 
+  .nav button {
+    width: 100%;
+    text-align: left; /* Maintain left alignment on mobile */
+  }
+ 
+  /* Improved header for mobile */
+  .brand {
+    font-size: 18px;
+  }
+ 
+  .subtitle {
+    font-size: 12px;
+  }
+ 
+  .creator-signature {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+  pre.output {
+    font-size: 13px; /* Slightly smaller font on mobile for better fit */
+    padding: 12px;
+  }
+}
+@media (max-width: 480px) {
+  .mobile-menu-toggle {
+    display: block;
+  }
+ 
+  .nav {
+    display: none;
+  }
+ 
+  .nav.mobile-open {
+    display: flex;
+  }
+ 
+  .nav button {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+ 
+  .controls {
+    flex-direction: column;
+  }
+ 
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
+ 
+  .header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+ 
+  .brand {
+    font-size: 16px;
+  }
+ 
+  .subtitle {
+    font-size: 11px;
+  }
+ 
+  .creator-signature {
+    font-size: 10px;
+  }
+ 
+  .stat-row {
+    flex-direction: column;
+  }
+ 
+  .stat-card {
+    min-width: 100%;
+  }
+  pre.output {
+    height: auto;
+    min-height: 150px;
+    font-size: 12px;
+  }
+}
+/* FORM STYLES */
+label{display:block;font-size:14px;color:rgba(255,255,255,0.38);margin-bottom:8px}
+body[data-theme="light"] label{color:rgba(0,0,0,0.55)}
+input[type="text"], input[type="number"], textarea, select{
+  width:100%;padding:14px;border-radius:10px;background:#03161a;border:1px solid rgba(255,255,255,0.03);color:inherit;font-family:var(--mono);font-size:14px;
+  outline:none;box-sizing:border-box;transition: all 0.2s;
+}
+input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+  border-color: var(--accent-dark);
+  box-shadow: 0 0 0 2px rgba(0,245,160,0.1);
+}
+body[data-theme="light"] input[type="text"],
+body[data-theme="light"] input[type="number"],
+body[data-theme="light"] textarea,
+body[data-theme="light"] select{
+  background:#ffffff;border:1px solid rgba(0,0,0,0.12);color:var(--muted-light);
+}
+body[data-theme="light"] input[type="text"]:focus,
+body[data-theme="light"] input[type="number"]:focus,
+body[data-theme="light"] textarea:focus,
+body[data-theme="light"] select:focus {
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 2px rgba(0,107,79,0.1);
+}
+.controls{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn{background:var(--accent-dark);border:none;color:#02121b;padding:12px 16px;border-radius:10px;cursor:pointer;font-weight:900;font-size:15px;transition: all 0.2s}
+body[data-theme="dark"] .btn:hover {
+  background: var(--bg-dark);
+  color: var(--accent-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+body[data-theme="light"] .btn{background:var(--accent-light);color:#e8fbf0}
+body[data-theme="light"] .btn:hover {
+  background: var(--bg-light);
+  color: var(--accent-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;font-weight:800}
+body[data-theme="dark"] .btn.ghost:hover {
+  background: var(--accent-dark);
+  color: var(--bg-dark);
+  transform: translateY(-2px);
+}
+body[data-theme="light"] .btn.ghost {
+  border: 1px solid rgba(0,0,0,0.12);
+}
+body[data-theme="light"] .btn.ghost:hover {
+  background: var(--accent-light);
+  color: var(--bg-light);
+  transform: translateY(-2px);
+}
+/* Generate JSON Button Click Effect */
+.btn.generate-json {
+  position: relative;
+  overflow: visible;
+}
+.btn.generate-json.clicked {
+  background: var(--bg-dark);
+  color: var(--accent-dark);
+  border: 2px solid var(--accent-dark);
+  transform: scale(0.95);
+  box-shadow: 0 0 20px rgba(0,245,160,0.3);
+}
+body[data-theme="light"] .btn.generate-json.clicked {
+  background: var(--bg-light);
+  color: var(--accent-light);
+  border: 2px solid var(--accent-light);
+  box-shadow: 0 0 20px rgba(0,107,79,0.3);
+}
+.stat-row{display:flex;gap:14px;flex-wrap:wrap}
+.stat-card{flex:1;min-width:160px;padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));border:1px solid rgba(255,255,255,0.02);transition: all 0.2s}
+body[data-theme="dark"] .stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+body[data-theme="light"] .stat-card{background:linear-gradient(180deg, rgba(0,0,0,0.01), rgba(0,0,0,0.008));border:1px solid rgba(0,0,0,0.04)}
+body[data-theme="light"] .stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+.stat-big{font-size:22px;color:var(--accent-dark);font-weight:900}
+body[data-theme="light"] .stat-big{color:var(--accent-light)}
+.stat-label{font-size:13px;color:rgba(255,255,255,0.38);margin-top:8px}
+body[data-theme="light"] .stat-label{color:rgba(0,0,0,0.5)}
+.recent{margin-top:14px;background:#021217;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);height:220px;overflow:auto}
+body[data-theme="light"] .recent{background:#f7fffb;border:1px solid rgba(0,0,0,0.04)}
+.recent-item{padding:10px;border-bottom:1px dashed rgba(255,255,255,0.02);font-size:14px}
+body[data-theme="light"] .recent-item{border-bottom:1px dashed rgba(0,0,0,0.04)}
+.footer{font-size:13px;color:rgba(255,255,255,0.22);margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+body[data-theme="light"] .footer{color:rgba(0,0,0,0.45)}
+.link{color:var(--muted2-dark);text-decoration:none;font-weight:900;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);transition: all 0.2s}
+body[data-theme="dark"] .link:hover {
+  background: var(--accent-dark);
+  color: var(--bg-dark);
+  transform: translateY(-2px);
+}
+body[data-theme="light"] .link{color:var(--muted2-light);border-color:rgba(0,0,0,0.04)}
+body[data-theme="light"] .link:hover {
+  background: var(--accent-light);
+  color: var(--bg-light);
+  transform: translateY(-2px);
+}
+/* NEW: Mobile menu toggle for very small screens */
+.mobile-menu-toggle {
+  display: none;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: inherit;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+body[data-theme="light"] .mobile-menu-toggle {
+  border: 1px solid rgba(0,0,0,0.1);
+}
+@media (max-width: 480px) {
+  .mobile-menu-toggle {
+    display: block;
+  }
+ 
+  .nav {
+    display: none;
+  }
+ 
+  .nav.mobile-open {
+    display: flex;
+  }
+}
+/* VALIDATION STYLES (NEW: Error Messages, Invalid Inputs) */
+.field.error input, .field.error select {
+  border-color: var(--error-red) !important;
+  box-shadow: 0 0 0 2px rgba(255,77,77,0.2) !important;
+}
+.error-msg {
+  color: var(--error-red);
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 700;
+}
+/* NEW: Responsive Pop-Up/Modal with Fade-In */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.show {
+  opacity: 1;
+}
+.modal-content {
+  background: var(--panel-dark);
+  padding: 24px;
+  border-radius: 16px;
+  max-width: 80%;
+  width: 420px;
+  text-align: center;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+.modal-overlay.show .modal-content {
+  transform: scale(1);
+}
+body[data-theme="light"] .modal-content {
+  background: var(--panel-light);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+}
+.modal-content .h-title {
+  margin-bottom: 12px;
+}
+.modal-content .h-sub {
+  font-size: 14px;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+.modal-content button {
+  margin-top: 20px;
+  background: var(--accent-dark);
+  color: var(--bg-dark);
+}
+body[data-theme="light"] .modal-content button {
+  background: var(--accent-light);
+  color: var(--bg-light);
+}
+/* Mobile Responsive Modal */
+@media (max-width: 480px) {
+  .modal-content {
+    max-width: 90%;
+    padding: 20px;
+  }
+  .modal-content .h-title {
+    font-size: 16px;
+  }
+  .modal-content .h-sub {
+    font-size: 13px;
+  }
+}
+/* TOOLTIP STYLES - FIXED */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 280px;
+  background-color: var(--accent-dark);
+  color: var(--bg-dark);
+  text-align: center;
+  border-radius: 8px;
+  padding: 12px;
+  position: absolute;
+  z-index: 1000;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+body[data-theme="light"] .tooltip .tooltiptext {
+  background-color: var(--accent-light);
+  color: var(--bg-light);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--accent-dark) transparent transparent transparent;
+}
+body[data-theme="light"] .tooltip .tooltiptext::after {
+  border-color: var(--accent-light) transparent transparent transparent;
+}
+.tooltip.show-tooltip .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+/* Generate JSON Button Tooltip */
+.btn.generate-json .tooltiptext {
+  width: 320px;
+  font-size: 12px;
+}
+/* Phase fields styling */
+.phases-section {
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 8px;
+  background: rgba(255,255,255,0.02);
+}
+body[data-theme="light"] .phases-section {
+  border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(0,0,0,0.02);
+}
+.phase-group {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed rgba(255,255,255,0.05);
+}
+body[data-theme="light"] .phase-group {
+  border-bottom: 1px dashed rgba(0,0,0,0.08);
+}
+.phase-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+/* Validation tooltip styles */
+.field {
+  position: relative;
+}
+.field .validation-tooltip {
+  visibility: hidden;
+  width: 220px;
+  background-color: var(--error-red);
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -110px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px;
+  font-weight: 700;
+}
+.field .validation-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--error-red) transparent transparent transparent;
+}
+.field.error .validation-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+</style>
+</head>
+<body data-theme="dark">
+<div class="modal-overlay" id="caution-modal">
+  <div class="modal-content">
+    <div class="h-title">Caution</div>
+    <div class="h-sub">BRC-8888 website may not be fully functional as this standard is evolving and may take a while before indexers pick it up. Till then, proceed with caution.</div>
+    <button class="btn" id="close-modal">Got It</button>
+  </div>
+</div>
+<div class="wrap">
+  <aside class="panel sidebar">
+    <div class="brand-container">
+      <div class="brand">BRC-8888</div>
+      <div class="subtitle">Universal Object Protocol: Stateful, Evolving, AI-Aware, PQ-Secured Assets on Bitcoin</div>
+      <div class="creator-signature">Niseta Sigosi — BRC-8888 Origin</div>
+    </div>
+    <button class="mobile-menu-toggle" id="mobile-menu-toggle">☰ Menu</button>
+   
+    <nav class="nav" id="menu">
+      <button data-tab="mint-unq" class="active">▶ Mint Quantum Edge (UNQ)</button>
+      <button data-tab="create-token">🛠 Deploy Object</button>
+      <button data-tab="mint-token">⚡ Mint Token</button>
+      <button data-tab="transfer-token">↔ Transfer</button>
+      <button data-tab="evolve-object">🔄 Evolve Object</button>
+      <button data-tab="stats">📊 Live Stats</button>
+      <button data-tab="instructions">❓ Instructions</button>
+      <div style="margin-top:12px" class="tiny">JSON Tools & Provider Integration (UniSat/Xverse)</div>
+    </nav>
+    <div style="margin-top:16px">
+      <div class="tiny">Quick Links</div>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+        <a class="link" href="https://unisat.io" target="_blank" rel="noopener">UniSat</a>
+        <a class="link" href="https://www.xverse.app" target="_blank" rel="noopener">Xverse</a>
+        <a class="link" href="https://ord.io" target="_blank" rel="noopener">Ord.io</a>
+      </div>
+      <div style="margin-top:14px" class="tiny">Protocol Fees (1% per tx to Treasury)</div>
+      <div style="margin-top:10px" class="tiny"><code id="feeaddr" style="display:block;word-break:break-all;font-weight:900">bc1puez48076vx6d3lnxkgnwzahsmpvmklfcnulcq0jgu6u4dl2yhmpsjr9kq0</code></div>
+      <div style="margin-top:14px;display:flex;gap:10px">
+        <button id="theme-toggle" class="btn ghost">Light Mode</button>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <!-- MINT UNQ PANEL -->
+    <section class="panel" id="mint-unq-panel">
+      <div class="header-row">
+        <div>
+          <div class="h-title">Mint Quantum Edge (UNQ) — Genesis Object</div>
+          <div class="h-sub">Mint from the 21M supply via phased fixed price (Phase 1: 2100 sats/unit for first 10M; Phase 2: 4200 sats/unit with AI perks). Fees: 1% per tx to treasury. Sim first!</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-section">
+          <div class="field">
+            <label>Minter Address (Taproot; optional)</label>
+            <input id="unq-minter" type="text" placeholder="bc1p... (defaults to inscriber)" title="Optional Taproot address to receive minted UNQ. If blank, uses inscriber's address." />
+            <div class="validation-tooltip">Minter address is required</div>
+          </div>
+          <div class="field">
+            <label>Quantity (1-10K cap per user)</label>
+            <input id="unq-qty" type="number" value="100" min="1" max="10000" title="Mint amount; enforced off-chain by indexers (user_cap=10000 for UNQ)." />
+            <div class="validation-tooltip">Quantity must be between 1 and 10000</div>
+          </div>
+          <div class="field">
+            <label>Phase Price per Unit (sats; informational)</label>
+            <input id="unq-price" type="number" value="2100" readonly title="Phased fixed price; Phase 1 (first 10M): 2100; Phase 2: 4200 + AI perks. Indexer computes based on total_minted." />
+          </div>
+          <div class="field">
+            <label>Memo/Reason (optional)</label>
+            <input id="unq-note" type="text" placeholder="Fair launch mint" title="Custom note for mint reason; stored in meta for provenance." />
+          </div>
+          <div class="controls">
+            <button class="btn generate-json tooltip" id="gen-unq">
+              Generate JSON
+              <span class="tooltiptext">JSON updates automatically as you type! Verify your information is correct, then use Download or Copy to proceed.</span>
+            </button>
+            <button class="btn ghost tooltip" id="download-unq">Download<span class="tooltiptext">Download JSON</span></button>
+            <button class="btn ghost tooltip" id="copy-unq">Copy<span class="tooltiptext">Copy to clipboard</span></button>
+            <button class="btn ghost" id="provider-inscribe-unq">Provider Inscribe</button>
+            <button class="btn ghost" id="open-unisat">UniSat</button>
+            <button class="btn ghost" id="open-xverse">Xverse</button>
+          </div>
+          <div class="tiny" style="margin-top:10px">Phased: Indexer enforces price based on total_minted (Phase 1 up to 10M; Phase 2 remaining with perks). Sim: deploy_ledger_validation.py for exact cost + outputs.</div>
+        </div>
+        <div class="json-preview">
+          <div class="tiny">Generated Mint JSON (Inscribe as Text)</div>
+          <pre id="unq-output" class="output">{ "p": "brc8888-1", ... }</pre>
+        </div>
+      </div>
+    </section>
+    <!-- DEPLOY OBJECT PANEL -->
+    <section class="panel" id="create-token-panel" style="display:none; margin-top:14px">
+      <div class="header-row">
+        <div>
+          <div class="h-title">Deploy Object — Register Class</div>
+          <div class="h-sub">Create a new object (e.g., token, NFT, AI agent). Fees: 1% per tx (10K creator for non-genesis). Unique tick required.</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-section">
+          <div class="field">
+            <label>Ticker (3-8 uppercase alphanum)</label>
+            <input id="deploy-tick" type="text" value="TESTX" maxlength="8" placeholder="3-8 uppercase letters/numbers" title="Unique 3-8 uppercase letters/numbers; indexers enforce uniqueness." />
+            <div class="validation-tooltip">Ticker must be 3-8 uppercase alphanumeric characters</div>
+          </div>
+          <div class="field">
+            <label>Object Type</label>
+            <select id="deploy-otype" title="Defines behavior: u-token for fungibles, u-ai for AI traits, etc. See instructions for details.">
+              <option value="u-token">u-token (Fungible)</option>
+              <option value="u-nft">u-nft (Unique)</option>
+              <option value="u-sft">u-sft (Semi-Fungible)</option>
+              <option value="u-ai">u-ai (AI-Aware)</option>
+              <option value="u-qid">u-qid (PQ Identity)</option>
+              <option value="u-object" selected>u-object (Generic)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Total Supply (string; e.g., 21000000)</label>
+            <input id="deploy-supply" type="text" value="10000000" placeholder="Positive integer string" title="Max units as string (precision); for u-nft set '1'; indexers cap mints." />
+            <div class="validation-tooltip">Supply must be a positive integer</div>
+          </div>
+          <div class="field">
+            <label>Decimals (0-18; default 8)</label>
+            <input id="deploy-decimals" type="number" value="8" min="0" max="18" title="Decimal places for fungibles; ignored for non-fungibles." />
+            <div class="validation-tooltip">Decimals must be between 0 and 18</div>
+          </div>
+          <div class="field">
+            <label>User Cap (per address; e.g., 5000)</label>
+            <input id="deploy-user-cap" type="number" value="5000" min="1" title="Max mint per user; set in mint_rules for fairness." />
+            <div class="validation-tooltip">User cap must be at least 1</div>
+          </div>
+          <div class="field">
+            <label>Pricing Model</label>
+            <select id="deploy-pricing-model" title="Choose pricing strategy for your token">
+              <option value="flat">Flat Price (Fixed price for all mints)</option>
+              <option value="phased">Phased Pricing (Multiple price tiers)</option>
+              <option value="free">Free Mint (No cost to users)</option>
+            </select>
+          </div>
+          <div id="flat-price-fields">
+            <div class="field">
+              <label>Flat Price (sats per unit)</label>
+              <input id="deploy-flat-price" type="number" value="2100" min="0" title="Fixed price in sats for all mints; set 0 for free mints." />
+              <div class="validation-tooltip">Price must be 0 or greater</div>
+            </div>
+          </div>
+          <div id="phased-fields" class="phases-section" style="display:none">
+            <div class="phase-group">
+              <div class="field">
+                <label>Phase 1 Start Minted</label>
+                <input id="phase1-start" type="text" value="0" readonly />
+              </div>
+              <div class="field">
+                <label>Phase 1 End Minted</label>
+                <input id="phase1-end" type="text" value="10000000" />
+                <div class="validation-tooltip">Phase end must be less than total supply</div>
+              </div>
+              <div class="field">
+                <label>Phase 1 Price (sats)</label>
+                <input id="phase1-price" type="number" value="2100" min="1" />
+                <div class="validation-tooltip">Price must be at least 1 sat</div>
+              </div>
+              <div class="field">
+                <label>Phase 1 Perks</label>
+                <input id="phase1-perks" type="text" value="Base access" placeholder="Early supporter benefits" />
+              </div>
+            </div>
+            <div class="phase-group">
+              <div class="field">
+                <label>Phase 2 Start Minted</label>
+                <input id="phase2-start" type="text" readonly />
+              </div>
+              <div class="field">
+                <label>Phase 2 End Minted</label>
+                <input id="phase2-end" type="text" readonly />
+              </div>
+              <div class="field">
+                <label>Phase 2 Price (sats)</label>
+                <input id="phase2-price" type="number" value="4200" min="1" />
+                <div class="validation-tooltip">Price must be at least 1 sat</div>
+              </div>
+              <div class="field">
+                <label>Phase 2 Perks</label>
+                <input id="phase2-perks" type="text" value="AI dynamic traits unlocked" placeholder="Premium benefits" />
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>AI Model ID (optional; e.g., gpt-q-lite)</label>
+            <input id="deploy-model" type="text" placeholder="gpt-q-lite" title="For u-ai: Model identifier; enables provenance/hash checks for trust." />
+          </div>
+          <div class="field">
+            <label>PQ Identity Pub (optional; pq:dilithium:BASE64...)</label>
+            <input id="deploy-pq" type="text" placeholder="pq:dilithium3:BASE64PUB..." title="PQ pubkey for sigs; format pq:scheme:BASE64; required for secure evolutions." />
+          </div>
+          <div class="field">
+            <label>Creator Address (for fees)</label>
+            <input id="deploy-creator-addr" type="text" placeholder="bc1p..." title="Your address to receive creator fees" />
+            <div class="validation-tooltip">Creator address is required</div>
+          </div>
+          <div class="field">
+            <label>Protocol Fee Address</label>
+            <input id="deploy-feeaddr" type="text" value="bc1puez48076vx6d3lnxkgnwzahsmpvmklfcnulcq0jgu6u4dl2yhmpsjr9kq0" readonly title="Fixed protocol treasury; receives 1% per tx. Not editable." />
+          </div>
+          <div class="field">
+            <label>Creator Fee Sats (non-genesis; default 10000)</label>
+            <input id="deploy-creatorfee" type="number" value="10000" readonly title="Fixed 10K sats for non-genesis deploys to your creator_fee_address. Not editable; exempt for genesis." />
+          </div>
+          <div class="controls">
+            <button class="btn generate-json tooltip" id="gen-deploy">
+              Generate JSON
+              <span class="tooltiptext">JSON updates automatically as you type! Verify your information is correct, then use Download or Copy to proceed.</span>
+            </button>
+            <button class="btn ghost tooltip" id="download-deploy">Download<span class="tooltiptext">Download JSON</span></button>
+            <button class="btn ghost tooltip" id="copy-deploy">Copy<span class="tooltiptext">Copy to clipboard</span></button>
+            <button class="btn ghost" id="provider-inscribe-deploy">Provider Inscribe</button>
+          </div>
+          <div class="tiny" style="margin-top:10px">Genesis (UNQ-like): Set genesis:true for exempt fees. Add mint_rules/phases for caps/phased pricing. Sim: validate_deploy in py.</div>
+        </div>
+        <div class="json-preview">
+          <div class="tiny">Generated Deploy JSON (Inscribe First)</div>
+          <pre id="deploy-output" class="output">{ "p": "brc8888-1", ... }</pre>
+        </div>
+      </div>
+    </section>
+    <!-- MINT TOKEN PANEL -->
+    <section class="panel" id="mint-token-panel" style="display:none; margin-top:14px">
+      <div class="header-row">
+        <div>
+          <div class="h-title">Mint Token — From Deployed Object</div>
+          <div class="h-sub">Mint qty from existing deploy. Checks caps/cooldowns; phased pricing if defined. Fees: 1% per tx to protocol.</div>
+        </div>
+        <div class="tiny">Deploy must exist; sim for cost (phased fixed prices).</div>
+      </div>
+      <div class="grid-2">
+        <div class="form-section">
+          <div class="field">
+            <label>Deployed Ticker</label>
+            <select id="mint-tick-select" title="Select from deployed tickers (fetched from indexer) or enter custom.">
+              <option value="">-- Fetching Deployed Tickers --</option>
+            </select>
+            <input id="mint-tick" type="text" placeholder="TESTX or select above" title="Existing tick from deploy; indexers verify." />
+            <div class="validation-tooltip">Ticker is required</div>
+          </div>
+          <div class="field">
+            <label>Quantity (respect user_cap)</label>
+            <input id="mint-qty" type="number" value="100" min="1" title="Mint amount; limited by deploy's user_cap (fetched if available)." />
+            <div class="validation-tooltip">Quantity must be at least 1</div>
+          </div>
+          <div class="field">
+            <label>Minter Address (required)</label>
+            <input id="mint-minter" type="text" placeholder="bc1p..." title="Address to receive minted units; required field." required />
+            <div class="validation-tooltip">Minter address is required</div>
+          </div>
+          <div class="field">
+            <label>Recipient Address (optional)</label>
+            <input id="mint-to" type="text" placeholder="bc1p... (defaults to minter)" title="Alternate receiver (e.g., airdrop); if blank, defaults to minter." />
+          </div>
+          <div class="field">
+            <label>Current Price per Unit (sats; informational)</label>
+            <input id="mint-price" type="number" value="2100" readonly title="Current price from deploy (fetched if available); based on total_minted." />
+          </div>
+          <div class="controls">
+            <button class="btn generate-json tooltip" id="gen-mint">
+              Generate JSON
+              <span class="tooltiptext">JSON updates automatically as you type! Verify your information is correct, then use Download or Copy to proceed.</span>
+            </button>
+            <button class="btn ghost tooltip" id="download-mint">Download<span class="tooltiptext">Download JSON</span></button>
+            <button class="btn ghost tooltip" id="copy-mint">Copy<span class="tooltiptext">Copy to clipboard</span></button>
+            <button class="btn ghost" id="provider-inscribe-mint">Provider Inscribe</button>
+          </div>
+          <div class="tiny" style="margin-top:10px">Exempt mints (founder): Skip phased price but check vesting/locks. Sim: validate_mint for total cost.</div>
+        </div>
+        <div class="json-preview">
+          <div class="tiny">Generated Mint JSON</div>
+          <pre id="mint-output" class="output">{ "p": "brc8888-1", ... }</pre>
+        </div>
+      </div>
+    </section>
+    <!-- TRANSFER PANEL -->
+    <section class="panel" id="transfer-token-panel" style="display:none; margin-top:14px">
+      <div class="header-row">
+        <div>
+          <div class="h-title">Transfer Object — Move Units</div>
+          <div class="h-sub">Transfer qty between addresses. Checks balances/locks; fees: 1% per tx. Ledger updated by indexers.</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-section">
+          <div class="field">
+            <label>Ticker</label>
+            <select id="transfer-tick-select" title="Select from deployed tickers (fetched from indexer) or enter custom.">
+              <option value="">-- Fetching Deployed Tickers --</option>
+            </select>
+            <input id="transfer-tick" type="text" placeholder="TESTX or select above" title="Existing tick from deploy; indexers verify." />
+            <div class="validation-tooltip">Ticker is required</div>
+          </div>
+          <div class="field">
+            <label>Quantity</label>
+            <input id="transfer-qty" type="number" value="50" min="1" title="Transfer amount; indexers check sender balance ≥ qty." />
+            <div class="validation-tooltip">Quantity must be at least 1</div>
+          </div>
+          <div class="field">
+            <label>From Address</label>
+            <input id="transfer-from" type="text" placeholder="bc1pSender..." title="Sender's address with sufficient unlocked balance." />
+            <div class="validation-tooltip">From address is required</div>
+          </div>
+          <div class="field">
+            <label>To Address</label>
+            <input id="transfer-to" type="text" placeholder="bc1pRecipient..." title="Recipient's address." />
+            <div class="validation-tooltip">To address is required</div>
+          </div>
+          <div class="controls">
+            <button class="btn generate-json tooltip" id="gen-transfer">
+              Generate JSON
+              <span class="tooltiptext">JSON updates automatically as you type! Verify your information is correct, then use Download or Copy to proceed.</span>
+            </button>
+            <button class="btn ghost tooltip" id="download-transfer">Download<span class="tooltiptext">Download JSON</span></button>
+            <button class="btn ghost tooltip" id="copy-transfer">Copy<span class="tooltiptext">Copy to clipboard</span></button>
+            <button class="btn ghost" id="provider-inscribe-transfer">Provider Inscribe</button>
+          </div>
+          <div class="tiny" style="margin-top:10px">Respects locks (e.g., vested founder non-transferable). Sim: Extend py for validate_transfer.</div>
+        </div>
+        <div class="json-preview">
+          <div class="tiny">Generated Transfer JSON</div>
+          <pre id="transfer-output" class="output">{ "p": "brc8888-1", ... }</pre>
+        </div>
+      </div>
+    </section>
+    <!-- EVOLVE PANEL -->
+    <section class="panel" id="evolve-object-panel" style="display:none; margin-top:14px">
+      <div class="header-row">
+        <div>
+          <div class="h-title">Evolve Object — Update State</div>
+          <div class="h-sub">Commit new Merkle root + PQ sig for traits/provenance. Triggers: transfer/time. Fees: 1% per tx.</div>
+        </div>
+        <div class="tiny">Prep: scripts/package_evolve.py; PQ-sign canonical payload.</div>
+      </div>
+      <div class="grid-2">
+        <div class="form-section">
+          <div class="field">
+            <label>Ticker</label>
+            <select id="evolve-tick-select" title="Select from deployed tickers (fetched from indexer) or enter custom.">
+              <option value="">-- Fetching Deployed Tickers --</option>
+            </select>
+            <input id="evolve-tick" type="text" value="UNQ" title="Object ticker to evolve." />
+            <div class="validation-tooltip">Ticker is required</div>
+          </div>
+          <div class="field">
+            <label>Ref Inscription ID</label>
+            <input id="evolve-ref" type="text" placeholder="deploy_or_last_evolve_id" title="Prior deploy/evolve ID for chain." />
+            <div class="validation-tooltip">Reference inscription ID is required</div>
+          </div>
+          <div class="field">
+            <label>Merkle Root (sha256:...)</label>
+            <input id="evolve-merkle" type="text" placeholder="sha256:3f2a9bdeadbeef..." title="SHA256 root from merkle_root.py on bundle." />
+            <div class="validation-tooltip">Merkle root is required</div>
+          </div>
+          <div class="field">
+            <label>Proof URI (IPFS/Arweave)</label>
+            <input id="evolve-uri" type="text" placeholder="ipfs://QmProofArchiveHash" title="Bundle upload URI; indexers fetch/verify." />
+            <div class="validation-tooltip">Proof URI is required</div>
+          </div>
+          <div class="field">
+            <label>PQ Signature (BASE64)</label>
+            <input id="evolve-sig" type="text" placeholder="BASE64_PQ_SIGNATURE" title="Sig over (ref || root || trigger); from PQ lib." />
+            <div class="validation-tooltip">PQ signature is required</div>
+          </div>
+          <div class="field">
+            <label>Trigger Type</label>
+            <select id="evolve-trigger-type" title="Condition for evolve (time: block/UTC, transfer: txid verify).">
+              <option value="time">Time/Block</option>
+              <option value="transfer">Transfer</option>
+              <option value="oracle">Oracle</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Trigger Details (JSON str)</label>
+            <input id="evolve-trigger" type="text" value='{"type":"time","block":0}' placeholder='{"type":"transfer","txid":"...","details":{"expected_qty":"100"}}' />
+            <div class="validation-tooltip">Trigger details are required</div>
+          </div>
+          <div class="controls">
+            <button class="btn generate-json tooltip" id="gen-evolve">
+              Generate JSON
+              <span class="tooltiptext">JSON updates automatically as you type! Verify your information is correct, then use Download or Copy to proceed.</span>
+            </button>
+            <button class="btn ghost tooltip" id="download-evolve">Download<span class="tooltiptext">Download JSON</span></button>
+            <button class="btn ghost tooltip" id="copy-evolve">Copy<span class="tooltiptext">Copy to clipboard</span></button>
+            <button class="btn ghost" id="provider-inscribe-evolve">Provider Inscribe</button>
+          </div>
+          <div class="tiny" style="margin-top:10px">Payload: (ref || merkle_root || trigger) canonical. Sim: Extend py for validate_evolve (sig/proof checks).</div>
+        </div>
+        <div class="json-preview">
+          <div class="tiny">Generated Evolve JSON</div>
+          <pre id="evolve-output" class="output">{ "p": "brc8888-1", ... }</pre>
+        </div>
+      </div>
+    </section>
+    <!-- STATS PANEL -->
+    <section class="panel" id="stats-panel" style="display:none; margin-top:14px">
+      <div class="header-row">
+        <div>
+          <div class="h-title">Live Protocol Stats</div>
+          <div class="h-sub">Realtime from indexer (or sample fallback). Tracks deploys/mints/evolves/sats.</div>
+        </div>
+        <div class="controls">
+          <button class="btn" id="refresh-stats">Refresh</button>
+          <button class="btn ghost" id="open-explorer">Ord.io Explorer</button>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-big" id="stat-deploys">0</div><div class="stat-label">Deploys</div></div>
+        <div class="stat-card"><div class="stat-big" id="stat-mints">0</div><div class="stat-label">Mints</div></div>
+        <div class="stat-card"><div class="stat-big" id="stat-transfers">0</div><div class="stat-label">Transfers</div></div>
+        <div class="stat-card"><div class="stat-big" id="stat-evolves">0</div><div class="stat-label">Evolves</div></div>
+        <div class="stat-card"><div class="stat-big" id="stat-sats">0</div><div class="stat-label">Sats Collected</div></div>
+      </div>
+      <div style="margin-top:16px">
+        <div class="tiny">Recent Inscriptions</div>
+        <div id="recent-list" class="recent"><div class="recent-item">Click Refresh for live data</div></div>
+      </div>
+    </section>
+    <!-- INSTRUCTIONS PANEL -->
+<section class="panel" id="instructions-panel" style="display:none; margin-top:14px">
+  <div class="header-row">
+    <div>
+      <div class="h-title">Instructions — Users, Creators, Indexers</div>
+      <div class="h-sub">Step-by-step for minting (users), deploying/evolving (creators), and validation (indexers). Start on Testnet.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:8px">
+    <!-- SECTION 0: SETUP FOR ALL ROLES -->
+    <div style="margin-bottom:12px" class="tiny"><strong>0) Prerequisite Setup (All Roles)</strong></div>
+    <pre class="output" style="height:280px;white-space:pre-wrap">
+1. Wallet Configuration: Install UniSat or Xverse wallet. Switch to Bitcoin Testnet:
+   - Settings → Network/Developer → Enable Testnet Mode
+   - This prevents using real BTC during testing
+
+2. Test Funds Acquisition: Visit the Mempool Faucet:
+   - URL: https://testnet-faucet.mempool.co/
+   - Request 0.005 tBTC (test Bitcoin) for gas fees
+   - Faucets may have daily limits or require CAPTCHA
+
+3. Repository & Simulation: Clone the BRC-8888 reference implementation:
+   - git clone https://github.com/xai-org/brc8888
+   - Run: python3 deploy_ledger_validation.py
+   - This simulates indexer operations locally before mainnet
+
+4. Exploration Tools:
+   - Use ord.io/testnet for inscription ID lookups
+   - Use mempool.space/testnet for transaction monitoring
+   - These tools help verify your inscriptions and track confirmations
+
+5. Mainnet Preparation:
+   - Convert testnet addresses (tb1p...) to mainnet (bc1p...)
+   - Fund with real BTC for production deployment
+   - Use unq_deploy.json for Quantum Edge bootstrap (fee exempt)
+    </pre>
+
+    <!-- SECTION 1: OBJECT TYPES -->
+    <div style="margin-top:12px" class="tiny"><strong>Object Type Definitions (u- Prefix)</strong></div>
+    <pre class="output" style="height:280px;white-space:pre-wrap">
+• u-token: Standard fungible tokens with decimal precision and fixed supply.
+  Example: Quantum Edge (UNQ) utility token. Supports phased minting pricing.
+
+• u-nft: Unique Non-Fungible Tokens (supply=1) with evolvable traits.
+  Each is distinct; metadata can update via evolution mechanics.
+
+• u-sft: Semi-Fungible Tokens for batches or limited editions.
+  Like game items where each batch is identical but limited in quantity.
+
+• u-ai: AI-Aware Objects with verifiable provenance.
+  Contains model_hash, dynamic_traits; evolves via AI-generated seeds/attestations.
+
+• u-qid: Post-Quantum Secure Digital Identities.
+  Uses Dilithium3 public keys for quantum-resistant signatures in credentials/reputation.
+
+• u-object: Generic extensible container (default for Quantum Edge).
+  Custom hybrids possible (e.g., AI-NFT combos).
+
+Selection Strategy: Choose during deployment. Combine types for advanced use cases:
+  Example: u-ai + u-sft for AI-generated limited edition collections.
+    </pre>
+
+    <!-- SECTION 2: USER GUIDE -->
+    <div style="margin-top:12px" class="tiny"><strong>User Guide: Minting & Transferring Quantum Edge</strong></div>
+    <pre class="output" style="height:320px;white-space:pre-wrap">
+QUANTUM EDGE (UNQ) MINTING PROCESS:
+
+1. Mint Quantum Edge Tokens:
+   - Navigate to "Mint" tab in interface
+   - Set quantity (qty) and ticker (UNQ for Quantum Edge)
+   - Generate inscription JSON payload
+   - Inscribe as text inscription on Bitcoin
+   - IMPORTANT: Add phased pricing outputs + 1% protocol fee
+
+   Phased Pricing Structure:
+     • Phase 1 (First 5M UNQ): 2,100 sats per unit
+     • Phase 2 (After 5M): 4,200 sats per unit + AI perk eligibility
+     • Indexers automatically enforce based on total_minted counter
+
+   Anti-Sybil Measures:
+     • Per-user cap: 10,000 UNQ maximum
+     • Cooldown period: 144 blocks (~24 hours) between mints
+     • Founder exemptions: 1M UNQ vested with linear unlocking post-cliff
+
+2. Transfer Tokens:
+   - Use "Transfer" tab
+   - Specify quantity, ticker, sender, and recipient addresses
+   - Generate transfer inscription
+   - Include mandatory 1% protocol fee output
+   - Validation: Sender balance ≥ transfer amount, vested tokens non-transferable
+
+3. Verification & Best Practices:
+   - Query indexer API: GET /state/UNQ for real-time balance
+   - Check inscription on ord.io explorer
+   - Start with small test amounts
+   - Use provider services for one-click minting (auto-fee calculation)
+   - Anonymity: VPN acceptable, no KYC requirements
+    </pre>
+
+    <!-- SECTION 3: CREATOR GUIDE -->
+    <div style="margin-top:12px" class="tiny"><strong>Creator Guide: Deploying & Evolving Objects</strong></div>
+    <pre class="output" style="height:400px;white-space:pre-wrap">
+DEPLOYMENT WORKFLOW:
+
+1. Deploy New Object Type:
+   - Access "Deploy" tab
+   - Configure: ticker symbol, object type (u-token, u-nft, etc.)
+   - Set total supply, decimal places, per-user minting caps
+   - Choose pricing: flat rate, phased increase, or free mint
+   - Advanced options:
+       • ai.model_id: Reference AI model (e.g., gpt-q-lite)
+       • quantum.identity_pub: Post-quantum public key (Dilithium3)
+   - Define mint_rules: caps, cooldowns, exemption lists, phase thresholds
+   - Fee structure: 1% per transaction (except genesis deploy)
+   - Non-genesis creators pay 10,000 UNQ deployment fee
+   - Generate → Inscribe → Record Inscription ID (critical for future references)
+
+2. Evolution Mechanics (State Updates):
+   - Prepare evolution bundle:
+       1. state.json (new state)
+       2. traits.json (from ai_trait_gen.py)
+       3. provenance.json (lineage proof)
+   - Compute Merkle root: scripts/merkle_root.py
+   - Package: package_evolve.py <directory> <ref_inscription> <ticker>
+   - Quantum Signature: Sign (ref || root || trigger) with Dilithium3 private key
+   - Trigger examples: {"type":"transfer","txid":"abc123","details":{"qty":"100"}}
+   - Update JSON with IPFS/Arweave URI and signature
+   - Inscribe evolution (include 1% fee output)
+
+   Evolution Use Cases:
+     • AI trait generation
+     • Game level progression
+     • Vesting schedule unlocks
+     • Phase transition triggers
+
+3. Security Recommendations:
+   - Generate PQ keys on air-gapped systems
+   - Pin metadata archives to decentralized storage (IPFS/Arweave)
+   - Test with validation scripts before mainnet
+    </pre>
+
+    <!-- SECTION 4: INDEXER GUIDE -->
+    <div style="margin-top:12px" class="tiny"><strong>Indexer Guide: Validation & Consensus Enforcement</strong></div>
+    <pre class="output" style="height:360px;white-space:pre-wrap">
+VALIDATION PIPELINE:
+
+1. JSON Parsing:
+   - Protocol identifier: p:"brc8888-1"
+   - Version: v:1
+   - Operation type: deploy/mint/transfer/evolve
+
+2. Fee Validation:
+   - Transaction outputs must include ≥ 1% of transferred value
+   - Additional phased fees for mint operations
+   - Verify fee addresses are within protocol scope
+
+3. Deployment Checks:
+   - Ticker must be unique (not previously deployed)
+   - Supply and decimals within valid ranges
+   - Store metadata: mint_rules, phases, AI config, quantum keys
+
+4. Mint Operation Validation:
+   - Corresponding deployment must exist
+   - total_minted + requested_qty ≤ total_supply
+   - Enforce user caps, cooldown periods, vesting schedules
+   - Calculate phased pricing based on current total_minted
+   - Founder exemptions skip phased pricing but respect locks
+   - Update: balances, minter stats, totals, last_block
+
+5. Transfer Validation:
+   - Sender balance ≥ transfer quantity
+   - Respect lock conditions (vested tokens)
+   - Update ledger debit/credit entries
+
+6. Evolution Verification:
+   - Reference inscription must be valid and latest in chain
+   - Recompute Merkle root from provided URI (must match)
+   - Verify post-quantum signature using oqs library
+   - Confirm trigger conditions met (e.g., txid exists with correct parameters)
+
+7. Ledger Management:
+   - Use defaultdicts for balance tracking
+   - Deterministic processing (ordinal inscription order)
+   - Multi-indexer synchronization for consensus
+
+8. Operational Tips:
+   - Reference implementation: deploy_ledger_validation.py
+   - Emit state change events via /state/TICK API
+   - Implement minimum fee/rate limits against spam
+   - Complete algorithm: indexer_validation.md
+    </pre>
+
+    <!-- SECTION 5: FAQ -->
+    <div style="margin-top:12px" class="tiny"><strong>FAQ — Frequently Asked Questions</strong></div>
+    <pre class="output" style="height:400px;white-space:pre-wrap">
+❓ What is BRC-8888?
+   Bitcoin-native protocol for stateful, evolving, AI-aware, post-quantum ready digital objects.
+   Universal layer for tokens, NFTs, AI assets, and quantum-resistant identities.
+
+❓ How does it compare to BRC-20?
+   Complementary and extensible. While BRC-20 handles simple fungibles,
+   BRC-8888 adds evolution mechanics, AI integration, and post-quantum security.
+
+❓ Does it require Bitcoin consensus changes?
+   No. Uses standard Bitcoin inscriptions. Indexers enforce rules off-chain
+   while settling finality on Bitcoin's base layer.
+
+❓ What is the fee model?
+   Mandatory 1% protocol fee on all transactions (sustainability).
+   Plus phased minting prices: 2,100 sats/unit (Phase 1), 4,200 sats/unit (Phase 2).
+
+❓ What is Quantum Edge (UNQ) genesis?
+   • Total supply: 21,000,000 UNQ
+   • Decimals: 8
+   • Phased minting: First 5M at 2,100 sats, remainder at 4,200 sats
+   • Founder allocation: 1,000,000 UNQ with vesting/lockup
+
+❓ Anti-abuse measures for minting?
+   • Per-user cap: 10,000 UNQ
+   • Cooldown: 144 blocks between mints
+   • Founder exemptions with vesting schedules
+   • Phased pricing to prevent front-running
+
+❓ How do evolutions work?
+   Immutable state updates via Merkle roots, post-quantum signatures,
+   and trigger conditions. Unlimited updates enable adaptive digital assets.
+
+❓ Are PQ/AI features mandatory?
+   Optional but recommended. Post-quantum for secure evolutions,
+   AI for provenance and dynamic traits. Demo available in ai_trait_gen.py.
+
+❓ Wallet and marketplace support?
+   Coming soon via indexer integration. Early integration bounties:
+   0.5% fee share + 100,000 UNQ reward for first major wallet integration.
+
+❓ What if an indexer rejects my transaction?
+   Ignored by network consensus—no penalty. Common causes: missing fees,
+   invalid signatures, cap violations. Use multi-indexer verification
+   and simulation API (/simulate/mint) before mainnet.
+
+❓ Can I deploy my own token?
+   Yes. Create non-genesis JSON with unique ticker, object type,
+   supply, and rules. Pay 10,000 UNQ + 1% fee deployment cost.
+
+❓ What about anonymity?
+   Pseudonymous by design. Uses Bitcoin's Bech32 addresses.
+   Air-gapped PQ signing enhances privacy. Treasury operations transparent.
+
+❓ Security considerations?
+   • Deterministic validation algorithms
+   • PQ signatures + Merkle proofs prevent tampering
+   • Best practices detailed in security.md
+   • Regular security audits planned
+
+❓ Where do I start?
+   1. Read the specification and validation documentation
+   2. Experiment with reference implementation code
+   3. Review examples (unq_deploy.json)
+   4. Join community on X/Discord for support
+    </pre>
+
+    <div class="tiny" style="margin-top:10px; padding:10px; background:#f5f5f5; border-radius:4px">
+      <strong>Disclaimer:</strong> For research and educational purposes. Protocol is experimental. 
+      No guarantees of performance or security. Consult with professionals before significant investment. 
+      Full documentation available at /docs (whitepaper, roadmap, security audit, extended FAQ).
+    </div>
+  </div>
+</section>
+    <div class="footer panel" style="margin-top:16px">
+      <div class="tiny">Contact: <a id="contact-email" href="mailto:NisetaSigosi@proton.me" class="link">NisetaSigosi@proton.me</a></div>
+      <div class="tiny">© 2025 BRC-8888 Protocol — Evolving Bitcoin Objects | <a href="https://github.com/NisetaSigosi/brc8888" class="link" target="_blank">GitHub</a></div>
+    </div>
+  </main>
+</div>
+<script>
+// SIMPLIFIED AND WORKING VERSION
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded - initializing BRC-8888');
+   
+    // Theme toggle - Force dark mode by default
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+   
+    // Set dark mode as default regardless of saved preference
+    body.setAttribute('data-theme', 'dark');
+    themeToggle.textContent = 'Light Mode';
+   
+    themeToggle.addEventListener('click', function() {
+        const currentTheme = body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        body.setAttribute('data-theme', newTheme);
+        themeToggle.textContent = newTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+        localStorage.setItem('brc8888_theme', newTheme);
+    });
+   
+    // Modal functionality
+    const modal = document.getElementById('caution-modal');
+    const closeModal = document.getElementById('close-modal');
+   
+    // Show modal on load
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('show'), 10);
+   
+    closeModal.addEventListener('click', function() {
+        modal.classList.remove('show');
+        setTimeout(() => modal.style.display = 'none', 300);
+    });
+   
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const navMenu = document.getElementById('menu');
+   
+    mobileMenuToggle.addEventListener('click', function() {
+        navMenu.classList.toggle('mobile-open');
+    });
+   
+    // Tab navigation
+    const tabs = document.querySelectorAll('#menu button');
+    const panels = {
+        'mint-unq': document.getElementById('mint-unq-panel'),
+        'create-token': document.getElementById('create-token-panel'),
+        'mint-token': document.getElementById('mint-token-panel'),
+        'transfer-token': document.getElementById('transfer-token-panel'),
+        'evolve-object': document.getElementById('evolve-object-panel'),
+        'stats': document.getElementById('stats-panel'),
+        'instructions': document.getElementById('instructions-panel')
+    };
+   
+    tabs.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all tabs
+            tabs.forEach(b => b.classList.remove('active'));
+            // Add active class to clicked tab
+            btn.classList.add('active');
+            // Hide all panels
+            Object.values(panels).forEach(p => p.style.display = 'none');
+            // Show the selected panel
+            panels[btn.dataset.tab].style.display = 'block';
+            // Close mobile menu if open
+            navMenu.classList.remove('mobile-open');
+            // Scroll to top
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        });
+    });
+   
+    // Download function
+    function download(filename, text) {
+        console.log('Downloading:', filename);
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+   
+    // Copy to clipboard function with tooltip
+    function copyToClipboard(text, button) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Show tooltip
+            button.classList.add('show-tooltip');
+            setTimeout(function() {
+                button.classList.remove('show-tooltip');
+            }, 2000);
+        }, function(err) {
+            console.error('Could not copy text: ', err);
+        });
+    }
+   
+    // Generate JSON button click handler with visual feedback
+    function setupGenerateJsonButton(buttonId) {
+        const button = document.getElementById(buttonId);
+        button.addEventListener('click', function() {
+            // Add visual feedback
+            this.classList.add('clicked');
+           
+            // Show tooltip
+            this.classList.add('show-tooltip');
+           
+            // Remove visual feedback after animation
+            setTimeout(() => {
+                this.classList.remove('clicked');
+            }, 600);
+           
+            // Hide tooltip after 3 seconds
+            setTimeout(() => {
+                this.classList.remove('show-tooltip');
+            }, 3000);
+        });
+    }
+   
+    // Pricing model toggle
+    const pricingModelSelect = document.getElementById('deploy-pricing-model');
+    const flatPriceFields = document.getElementById('flat-price-fields');
+    const phasedFields = document.getElementById('phased-fields');
+   
+    function updatePricingModel() {
+        const model = pricingModelSelect.value;
+       
+        if (model === 'flat') {
+            flatPriceFields.style.display = 'block';
+            phasedFields.style.display = 'none';
+        } else if (model === 'phased') {
+            flatPriceFields.style.display = 'none';
+            phasedFields.style.display = 'block';
+            updatePhaseRanges();
+        } else if (model === 'free') {
+            flatPriceFields.style.display = 'block';
+            phasedFields.style.display = 'none';
+            document.getElementById('deploy-flat-price').value = '0';
+        }
+       
+        // Update JSON when pricing model changes
+        document.getElementById('deploy-output').textContent = generateDeployJson();
+    }
+   
+    pricingModelSelect.addEventListener('change', updatePricingModel);
+   
+    // Update phase ranges based on supply
+    function updatePhaseRanges() {
+        const supply = document.getElementById('deploy-supply').value || "10000000";
+        const phase1End = document.getElementById('phase1-end');
+        const phase2Start = document.getElementById('phase2-start');
+        const phase2End = document.getElementById('phase2-end');
+       
+        // Set phase 2 start to phase 1 end + 1
+        if (phase1End.value) {
+            phase2Start.value = (parseInt(phase1End.value) + 1).toString();
+        }
+       
+        // Set phase 2 end to total supply
+        phase2End.value = supply;
+       
+        // Update JSON when phase ranges change
+        document.getElementById('deploy-output').textContent = generateDeployJson();
+    }
+   
+    // Generate JSON functions
+    function generateUnqJson() {
+        const minter = document.getElementById('unq-minter').value.trim() || "bc1pMinterAddressPlaceholder...";
+        const qty = document.getElementById('unq-qty').value || "100";
+        const price = document.getElementById('unq-price').value || 2100;
+        const note = document.getElementById('unq-note').value || "Public minting UNQ units via phased fixed price";
+       
+        return JSON.stringify({
+            "p": "brc8888-1",
+            "v": "1",
+            "op": "mint",
+            "tick": "UNQ",
+            "qty": qty,
+            "minter": minter,
+            "price": {
+                "amount_sats": price,
+                "currency": "BTC",
+                "note": "Phased fixed price per unit in sats"
+            },
+            "fees": {
+                "fee_type": "onchain_output",
+                "protocol_fee_percent": 1,
+                "fee_address": "bc1puez48076vx6d3lnxkgnwzahsmpvmklfcnulcq0jgu6u4dl2yhmpsjr9kq0",
+                "fee_scope": "per_tx"
+            },
+            "meta": {
+                "reason": note,
+                "timestamp": new Date().toISOString(),
+                "created_by": "Niseta Sigosi"
+            }
+        }, null, 2);
+    }
+   
+    function generateDeployJson() {
+        const tick = document.getElementById('deploy-tick').value.toUpperCase() || "TESTX";
+        const otype = document.getElementById('deploy-otype').value;
+        const supply = document.getElementById('deploy-supply').value || "10000000";
+        const decimals = document.getElementById('deploy-decimals').value || 8;
+        const userCap = document.getElementById('deploy-user-cap').value || 5000;
+        const pricingModel = document.getElementById('deploy-pricing-model').value;
+        const creatorAddr = document.getElementById('deploy-creator-addr').value.trim() || "bc1pCreatorAddressPlaceholder...";
+       
+        // Build mint_rules based on pricing model
+        let mintRules = {
+            "user_cap": userCap.toString(),
+            "exempt_addrs": [],
+            "cooldown_blocks": 144
+        };
+       
+        if (pricingModel === 'phased') {
+            mintRules.phases = [
+                {
+                    "start_minted": document.getElementById('phase1-start').value || "0",
+                    "end_minted": document.getElementById('phase1-end').value || "10000000",
+                    "price_sats": Number(document.getElementById('phase1-price').value) || 2100,
+                    "perks": document.getElementById('phase1-perks').value || "Base access"
+                },
+                {
+                    "start_minted": document.getElementById('phase2-start').value || "10000001",
+                    "end_minted": document.getElementById('phase2-end').value || supply,
+                    "price_sats": Number(document.getElementById('phase2-price').value) || 4200,
+                    "perks": document.getElementById('phase2-perks').value || "AI dynamic traits unlocked"
+                }
+            ];
+        } else if (pricingModel === 'flat') {
+            const flatPrice = document.getElementById('deploy-flat-price').value || 2100;
+            if (flatPrice > 0) {
+                mintRules.phases = [
+                    {
+                        "start_minted": "0",
+                        "end_minted": supply,
+                        "price_sats": Number(flatPrice),
+                        "perks": "Standard mint"
+                    }
+                ];
+            }
+            // If flat price is 0, no phases (free mint)
+        }
+        // For free model, no phases are added
+       
+        return JSON.stringify({
+            "p": "brc8888-1",
+            "v": "1",
+            "op": "deploy",
+            "tick": tick,
+            "genesis": false,
+            "otype": otype,
+            "supply": supply,
+            "decimals": decimals,
+            "mint_rules": mintRules,
+            "ai": {
+                "enabled": false
+            },
+            "quantum": {
+                "post_quantum_secure": false
+            },
+            "fees": {
+                "fee_type": "onchain_output",
+                "deploy_creation_fee_sats": 10000,
+                "protocol_fee_percent": 1,
+                "creator_fee_address": creatorAddr,
+                "protocol_fee_address": "bc1puez48076vx6d3lnxkgnwzahsmpvmklfcnulcq0jgu6u4dl2yhmpsjr9kq0",
+                "fee_scope": "per_tx",
+                "note": "Non-genesis deploy: Pay deploy_creation_fee_sats to creator_fee_address + protocol_fee_percent to protocol_fee_address. For mints: protocol_fee_percent per_tx + phased price to reserve minus 1% to protocol_fee_address."
+            },
+            "reserve_address": creatorAddr,
+            "meta": {
+                "name": tick,
+                "description": `${tick}: Custom token under BRC-8888 — e.g., example for testing. Fair launch with user caps and pricing.`,
+                "uri": "ipfs://QmYourTokenMeta",
+                "tokenomics": `${supply} fixed. Paid deploy (10k sats total). Mints: 1% earnings to BRC-8888 protocol.`
+            },
+            "created_by": "TokenCreator",
+            "timestamp": new Date().toISOString()
+        }, null, 2);
+    }
+   
+    function generateMintJson() {
+        const tick = document.getElementById('mint-tick').value.toUpperCase() || "TESTX";
+        const qty = document.getElementById('mint-qty').value || "100";
+        const minter = document.getElementById('mint-minter').value.trim();
+        const to = document.getElementById('mint-to').value.trim() || "";
+       
+        // Use tooltip instead of alert for validation
+        if (!minter) {
+            const field = document.getElementById('mint-minter').parentElement;
+            field.classList.add('error');
+            setTimeout(function() {
+                field.classList.remove('error');
+            }, 3000);
+        }
+       
+        return JSON.stringify({
+            "p": "brc8888-1",
+            "v": "1",
+            "op": "mint",
+            "tick": tick,
+            "qty": qty,
+            "minter": minter,
+            ...(to && {"to": to}),
+            "fees": {
+                "fee_type": "onchain_output",
+                "protocol_fee_percent": 1,
+                "fee_address": "bc1puez48076vx6d3lnxkgnwzahsmpvmklfcnulcq0jgu6u4dl2yhmpsjr9kq0"
+            },
+            "meta": {
+                "reason": `Minting ${tick} tokens`,
+                "timestamp": new Date().toISOString(),
+                "created_by": "User"
+            }
+        }, null, 2);
+    }
+   
+    function generateTransferJson() {
+        const tick = document.getElementById('transfer-tick').value || "TESTX";
+        const qty = document.getElementById('transfer-qty').value || "50";
+        const from = document.getElementById('transfer-from').value || "bc1pSenderAddressPlaceholder...";
+        const to = document.getElementById('transfer-to').value || "bc1pRecipientAddressPlaceholder...";
+       
+        return JSON.stringify({
+            "p": "brc8888-1",
+            "v": "1",
+            "op": "transfer",
+            "tick": tick,
+            "qty": qty,
+            "from": from,
+            "to": to,
+            "fees": {
+                "fee_type": "onchain_output",
+                "protocol_fee_percent": 1,
+                "fee_address": "bc1puez48076vx6d3lnxkgnwzahsmpvmklfcnulcq0jgu6u4dl2yhmpsjr9kq0"
+            },
+            "meta": {
+                "reason": `Transferring ${tick} tokens`,
+                "timestamp": new Date().toISOString(),
+                "created_by": "User"
+            }
+        }, null, 2);
+    }
+   
+    function generateEvolveJson() {
+        const tick = document.getElementById('evolve-tick').value || "UNQ";
+        const ref = document.getElementById('evolve-ref').value || "inscription_id_of_deploy_or_last_evolve";
+        const merkle = document.getElementById('evolve-merkle').value || "sha256:3f2a9bdeadbeef00000000000000000000000000000000000000000000000000";
+        const uri = document.getElementById('evolve-uri').value || "ipfs://QmProofArchiveHash";
+       
+        return JSON.stringify({
+            "p": "brc8888-1",
+            "v": "1",
+            "op": "evolve",
+            "ref": ref,
+            "tick": tick,
+            "merkle_root": merkle,
+            "proof_uri": uri,
+            "fees": {
+                "fee_type": "onchain_output",
+                "protocol_fee_percent": 1,
+                "fee_address": "bc1puez48076vx6d3lnxkgnwzahsmpvmklfcnulcq0jgu6u4dl2yhmpsjr9kq0"
+            },
+            "meta": {
+                "purpose": `State evolution for ${tick}`,
+                "timestamp": new Date().toISOString(),
+                "created_by": "Creator"
+            }
+        }, null, 2);
+    }
+   
+    // Initialize JSON outputs
+    document.getElementById('unq-output').textContent = generateUnqJson();
+    document.getElementById('deploy-output').textContent = generateDeployJson();
+    document.getElementById('mint-output').textContent = generateMintJson();
+    document.getElementById('transfer-output').textContent = generateTransferJson();
+    document.getElementById('evolve-output').textContent = generateEvolveJson();
+   
+    // Set up Generate JSON buttons with visual feedback
+    setupGenerateJsonButton('gen-unq');
+    setupGenerateJsonButton('gen-deploy');
+    setupGenerateJsonButton('gen-mint');
+    setupGenerateJsonButton('gen-transfer');
+    setupGenerateJsonButton('gen-evolve');
+   
+    // Set up event listeners for Download buttons
+    document.getElementById('download-unq').addEventListener('click', function() {
+        const content = document.getElementById('unq-output').textContent;
+        download('unq_mint.json', content);
+    });
+   
+    document.getElementById('download-deploy').addEventListener('click', function() {
+        const content = document.getElementById('deploy-output').textContent;
+        download('deploy_object.json', content);
+    });
+   
+    document.getElementById('download-mint').addEventListener('click', function() {
+        const content = document.getElementById('mint-output').textContent;
+        download('mint_token.json', content);
+    });
+   
+    document.getElementById('download-transfer').addEventListener('click', function() {
+        const content = document.getElementById('transfer-output').textContent;
+        download('transfer_token.json', content);
+    });
+   
+    document.getElementById('download-evolve').addEventListener('click', function() {
+        const content = document.getElementById('evolve-output').textContent;
+        download('evolve_object.json', content);
+    });
+   
+    // Set up event listeners for Copy buttons with tooltip
+    document.getElementById('copy-unq').addEventListener('click', function() {
+        const content = document.getElementById('unq-output').textContent;
+        copyToClipboard(content, this);
+    });
+   
+    document.getElementById('copy-deploy').addEventListener('click', function() {
+        const content = document.getElementById('deploy-output').textContent;
+        copyToClipboard(content, this);
+    });
+   
+    document.getElementById('copy-mint').addEventListener('click', function() {
+        const content = document.getElementById('mint-output').textContent;
+        copyToClipboard(content, this);
+    });
+   
+    document.getElementById('copy-transfer').addEventListener('click', function() {
+        const content = document.getElementById('transfer-output').textContent;
+        copyToClipboard(content, this);
+    });
+   
+    document.getElementById('copy-evolve').addEventListener('click', function() {
+        const content = document.getElementById('evolve-output').textContent;
+        copyToClipboard(content, this);
+    });
+   
+    // Set up real-time updates for form inputs
+    const unqInputs = ['unq-minter', 'unq-qty', 'unq-note'];
+    unqInputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            document.getElementById('unq-output').textContent = generateUnqJson();
+        });
+    });
+   
+    const deployInputs = ['deploy-tick', 'deploy-otype', 'deploy-supply', 'deploy-decimals', 'deploy-user-cap', 'deploy-creator-addr', 'deploy-flat-price', 'phase1-end', 'phase1-price', 'phase1-perks', 'phase2-price', 'phase2-perks'];
+    deployInputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            if (id === 'deploy-supply' || id === 'phase1-end') {
+                updatePhaseRanges();
+            } else {
+                document.getElementById('deploy-output').textContent = generateDeployJson();
+            }
+        });
+    });
+   
+    const mintInputs = ['mint-tick', 'mint-qty', 'mint-minter', 'mint-to'];
+    mintInputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            document.getElementById('mint-output').textContent = generateMintJson();
+        });
+    });
+   
+    const transferInputs = ['transfer-tick', 'transfer-qty', 'transfer-from', 'transfer-to'];
+    transferInputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            document.getElementById('transfer-output').textContent = generateTransferJson();
+        });
+    });
+   
+    const evolveInputs = ['evolve-tick', 'evolve-ref', 'evolve-merkle', 'evolve-uri'];
+    evolveInputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            document.getElementById('evolve-output').textContent = generateEvolveJson();
+        });
+    });
+   
+    // External links
+    document.getElementById('open-unisat').addEventListener('click', function() {
+        window.open('https://unisat.io/inscribe', '_blank');
+    });
+   
+    document.getElementById('open-xverse').addEventListener('click', function() {
+        window.open('https://www.xverse.app', '_blank');
+    });
+   
+    document.getElementById('open-explorer').addEventListener('click', function() {
+        window.open('https://ord.io/testnet', '_blank');
+    });
+   
+    // Stats functionality
+    document.getElementById('refresh-stats').addEventListener('click', function() {
+        const stats = {
+            deploys: Math.floor(Math.random() * 100) + 50,
+            mints: Math.floor(Math.random() * 1000) + 500,
+            transfers: Math.floor(Math.random() * 500) + 200,
+            evolves: Math.floor(Math.random() * 50) + 20,
+            sats: Math.floor(Math.random() * 10000000) + 5000000
+        };
+       
+        document.getElementById('stat-deploys').textContent = stats.deploys;
+        document.getElementById('stat-mints').textContent = stats.mints;
+        document.getElementById('stat-transfers').textContent = stats.transfers;
+        document.getElementById('stat-evolves').textContent = stats.evolves;
+        document.getElementById('stat-sats').textContent = stats.sats.toLocaleString();
+       
+        const recentList = document.getElementById('recent-list');
+        recentList.innerHTML = `
+            <div class="recent-item"><strong style="color:var(--accent-dark)">UNQ</strong> • mint • <code>insc_abc123...</code> • TX: tx123456...</div>
+            <div class="recent-item"><strong style="color:var(--accent-dark)">TESTX</strong> • deploy • <code>insc_def456...</code> • TX: tx789012...</div>
+            <div class="recent-item"><strong style="color:var(--accent-dark)">AIGAME</strong> • evolve • <code>insc_ghi789...</code> • TX: tx345678...</div>
+        `;
+    });
+   
+    // Initialize pricing model and stats
+    updatePricingModel();
+    document.getElementById('refresh-stats').click();
+   
+    console.log('BRC-8888 initialization complete');
+});
+</script>
+</body>
+</html>
