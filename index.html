@@ -375,20 +375,38 @@ body[data-theme="light"] .link:hover {
   color: var(--bg-light);
   transform: translateY(-2px);
 }
-/* NEW: Mobile menu toggle for very small screens */
+/* NEW: Mobile menu toggle for very small screens - FIXED */
 .mobile-menu-toggle {
   display: none;
-  background: transparent;
+  background: var(--accent-dark);
   border: 1px solid rgba(255,255,255,0.1);
-  color: inherit;
-  padding: 10px;
-  border-radius: 8px;
+  color: var(--bg-dark);
+  padding: 14px 20px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 14px;
-  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 900;
+  margin-bottom: 16px;
+  width: 100%;
+  text-align: center;
+  transition: all 0.2s;
 }
 body[data-theme="light"] .mobile-menu-toggle {
+  background: var(--accent-light);
+  color: var(--bg-light);
   border: 1px solid rgba(0,0,0,0.1);
+}
+body[data-theme="dark"] .mobile-menu-toggle:hover {
+  background: var(--bg-dark);
+  color: var(--accent-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+body[data-theme="light"] .mobile-menu-toggle:hover {
+  background: var(--bg-light);
+  color: var(--accent-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 @media (max-width: 480px) {
   .mobile-menu-toggle {
@@ -598,7 +616,7 @@ body[data-theme="light"] .phase-group {
 <div class="modal-overlay" id="caution-modal">
   <div class="modal-content">
     <div class="h-title">Caution</div>
-<div class="h-sub">BRC-8888 website may not be fully functional as this standard is evolving and may take a while before indexers pick it up. Till then, proceed with caution.<br>Live Stats may not show correctly.</div>
+    <div class="h-sub">BRC-8888 website may not be fully functional as this standard is evolving and may take a while before indexers pick it up. Till then, proceed with caution.<br>Live Stats may not show correctly.</div>
     <button class="btn" id="close-modal">Got It</button>
   </div>
 </div>
