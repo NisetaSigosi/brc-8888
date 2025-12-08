@@ -60,5 +60,3 @@ https://ordinals.com/inscription/111675299
 The next decade of Bitcoin assets starts here.
 
 — Niseta Sigosi
-
-#BRC8888 #UNQ #QuantumEdge #Bitcoin #Ordinals #Runes #BRC20 #SATS #PostQuantum #Inscriptions #BitcoinDeFi #QuantumBitcoin
