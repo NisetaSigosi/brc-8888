@@ -1,4 +1,4 @@
-![BRC-8888 Quantum Shield](https://nisetasigosi.github.io/brc-8888/images/1.webp)
+![BRC-8888 Quantum Shield](https://github.com/NisetaSigosi/brc-8888/blob/main/images/1.webp)
 *Source: generated with Flux — BRC-8888 quantum shield protecting Bitcoin*
 
 Today marks the official public introduction of **BRC-8888**, the first Bitcoin-native protocol that brings true stateful, evolvable, and post-quantum-secure digital objects directly on top of Ordinals inscriptions — without sidechains, wrapped tokens, or consensus changes.
