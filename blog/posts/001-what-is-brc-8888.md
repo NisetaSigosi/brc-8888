@@ -1,9 +1,6 @@
 ![BRC-8888 Quantum Shield](/images/1.webp)
 *Source: generated with Flux — BRC-8888 quantum shield protecting Bitcoin*
 
-### BRC-8888 — The First Post-Quantum Evolvable Object Standard on Bitcoin Ordinals  
-**December 10, 2025 — Niseta Sigosi**
-
 Today marks the official public introduction of **BRC-8888**, the first Bitcoin-native protocol that brings true stateful, evolvable, and post-quantum-secure digital objects directly on top of Ordinals inscriptions — without sidechains, wrapped tokens, or consensus changes.
 
 While BRC-20 and Runes gave Bitcoin fungible tokens and efficient UTXOs, they remain **static**. Once deployed, their rules are frozen forever.
