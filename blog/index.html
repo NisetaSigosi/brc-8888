@@ -1,1 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BRC-8888 Updates — Niseta Sigosi</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='black'/><text x='50' y='75' font-size='70' text-anchor='middle' fill='white'>₿</text></svg>" />
+  
+  <!-- Google Analytics (same as main site) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-P500XD8CG9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-P500XD8CG9');
+  </script>
+  
+  <!-- Open Graph Meta for Social Sharing -->
+  <meta property="og:title" content="BRC-8888 Updates — Niseta Sigosi" />
+  <meta property="og:description" content="Latest updates on BRC-8888 protocol by Niseta Sigosi." />
+  <meta property="og:image" content="https://nisetasigosi.github.io/brc-8888/thumbnail.jpg" />
+  <meta property="og:url" content="https://nisetasigosi.github.io/brc-8888/blog/" />
+  <meta property="og:type" content="website" />
+  
+  <style>
+  :root{
+    --bg-light:#f5f7fb; --panel-light:#ffffff; --accent-light:#006b4f; --muted-light:#0b3426; --muted2-light:#1b513f;
+    --mono: ui-monospace, "Roboto Mono", "Courier New", monospace;
+    --glass: rgba(255,255,255,0.03);
+    --base-font:16px;
+    --error-red: #ff4d4d;
+  }
+  
+  /* Base styles with overflow prevention */
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: var(--mono);
+    -webkit-font-smoothing: antialiased;
+    font-size: var(--base-font);
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  body {
+    background: linear-gradient(180deg,#f7fafc 0%, var(--bg-light) 100%);
+    color: var(--muted-light);
+  }
+  
+  /* Main container */
+  .wrap {
+    max-width: 1280px;
+    margin: 20px auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+  
+  .panel {
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(0,0,0,0.04);
+    box-shadow: 0 8px 26px rgba(0,0,0,0.06);
+    background: var(--panel-light);
+    box-sizing: border-box;
+    width: 100%;
+  }
+  
+  .sidebar {
+    padding: 18px;
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+  }
+  
+  .brand-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+  
+  .brand {
+    font-size: 20px;
+    color: var(--accent-light);
+    font-weight: 900;
+    letter-spacing: 0.6px;
+    line-height: 1.2;
+  }
+  
+  .subtitle {
+    font-size: 13px;
+    margin-top: 4px;
+    opacity: .95;
+    line-height: 1.3;
+  }
+  
+  .creator-signature {
+    font-size: 12px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(0,107,79,0.05);
+    border: 1px solid rgba(0,107,79,0.1);
+    color: var(--accent-light);
+    font-weight: 700;
+    text-align: center;
+  }
+  
+  .nav {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .nav button, .more-btn {
+    background: transparent;
+    border: 1px solid rgba(0,0,0,0.12);
+    padding: 14px;
+    text-align: left;
+    border-radius: 10px;
+    color: inherit;
+    cursor: pointer;
+    font-weight: 900;
+    font-size: 15px;
+    transition: all .12s;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .nav button:hover, .more-btn:hover {
+    background: var(--accent-light);
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  
+  .tiny {
+    font-size: 13px;
+    color: rgba(0,0,0,0.55);
+  }
+  
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .h-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--accent-light);
+  }
+  
+  .h-sub {
+    font-size: 13px;
+    color: rgba(0,0,0,0.55);
+  }
+  
+  /* Post styling with overflow prevention */
+  .post {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .post:last-child {
+    border-bottom: none;
+  }
+  
+  .post-title {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--accent-light);
+    margin: 0 0 8px 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+  
+  .post-meta {
+    font-size: 13px;
+    color: rgba(0,0,0,0.55);
+    margin-bottom: 16px;
+  }
+  
+  /* FIXED: Post content with proper text wrapping */
+  .post-content {
+    line-height: 1.6;
+    margin-bottom: 16px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .post-content h3 {
+    color: var(--accent-light);
+    font-size: 16px;
+    margin-top: 20px;
+  }
+  
+  .post-content p {
+    margin-bottom: 12px;
+  }
+  
+  /* Fixed code blocks */
+  .post-content pre {
+    background: #f3faf6;
+    padding: 16px;
+    border-radius: 10px;
+    color: var(--muted-light);
+    border: 1px solid rgba(0,0,0,0.04);
+    overflow-x: auto;
+    font-size: 14px;
+    font-weight: 900;
+    margin: 16px 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .post-content code {
+    background: #f3faf6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 14px;
+    white-space: normal;
+    word-break: break-word;
+  }
+  
+  /* FIXED: Responsive images */
+  .post-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 24px auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease;
+    box-sizing: border-box;
+  }
+  
+  .post-content img:hover {
+    transform: scale(1.01);
+  }
+  
+  /* For images with captions */
+  .post-content figure {
+    margin: 24px auto;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .post-content figcaption {
+    font-size: 14px;
+    color: rgba(0,0,0,0.6);
+    text-align: center;
+    margin-top: 8px;
+    font-style: italic;
+  }
+  
+  .hashtags {
+    color: var(--accent-light);
+    font-weight: 900;
+    font-size: 13px;
+    margin-top: 16px;
+  }
+  
+  /* Share buttons */
+  .share-buttons {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .share-btn {
+    background: transparent;
+    border: 1px solid rgba(0,0,0,0.12);
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: var(--muted-light);
+    text-decoration: none;
+    font-weight: 900;
+    transition: all 0.2s;
+    box-sizing: border-box;
+  }
+  
+  .share-btn:hover {
+    background: var(--accent-light);
+    color: white !important;
+    transform: translateY(-2px);
+  }
+  
+  .copy-btn {
+    background: var(--muted2-light);
+    color: white;
+  }
+  
+  .copy-btn:hover {
+    background: var(--muted-light);
+    color: white !important;
+  }
+  
+  /* Sidebar */
+  .sidebar h3 {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--accent-light);
+    margin-bottom: 12px;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .sidebar li {
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 900;
+  }
+  
+  .sidebar a {
+    color: var(--muted-light);
+    text-decoration: none;
+    display: block;
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(0,0,0,0.04);
+  }
+  
+  .sidebar a:hover {
+    color: var(--accent-light);
+  }
+  
+  .sidebar small {
+    font-size: 12px;
+    color: rgba(0,0,0,0.45);
+    display: block;
+    margin-top: 4px;
+  }
+  
+  /* Footer and links */
+  footer {
+    font-size: 13px;
+    color: rgba(0,0,0,0.45);
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0,0,0,0.04);
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .link {
+    color: var(--muted2-light);
+    text-decoration: none;
+    font-weight: 900;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.04);
+    transition: all 0.2s;
+    box-sizing: border-box;
+    display: inline-block;
+  }
+  
+  .link:hover {
+    background: var(--accent-light);
+    color: white !important;
+    transform: translateY(-2px);
+  }
+  
+  /* RESPONSIVE DESIGN */
+  @media (max-width: 1080px) {
+    .wrap {
+      grid-template-columns: 1fr;
+      padding: 16px;
+      gap: 16px;
+      width: 100%;
+    }
+    
+    .sidebar {
+      position: static;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    :root {
+      --base-font: 15px;
+    }
+    
+    .wrap {
+      padding: 12px !important;
+      gap: 12px;
+      width: 100%;
+    }
+    
+    .panel {
+      padding: 16px !important;
+      width: 100%;
+    }
+    
+    .post-title {
+      font-size: 20px;
+    }
+    
+    /* Mobile image adjustments */
+    .post-content img {
+      margin: 16px auto;
+      border-radius: 6px;
+      max-width: 100%;
+      padding: 0;
+    }
+    
+    /* Ensure no horizontal overflow */
+    .post-content pre,
+    .post-content code {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+    }
+    
+    .wrap {
+      padding: 8px !important;
+      width: 100%;
+    }
+    
+    .panel {
+      padding: 12px !important;
+      width: 100%;
+    }
+    
+    .share-buttons {
+      flex-direction: column;
+    }
+    
+    .share-btn {
+      width: 100%;
+      text-align: center;
+    }
+    
+    .nav button, .more-btn {
+      padding: 12px 14px;
+      font-size: 14px;
+    }
+    
+    .brand {
+      font-size: 18px;
+    }
+    
+    .subtitle {
+      font-size: 12px;
+    }
+    
+    .creator-signature {
+      font-size: 11px;
+      padding: 6px 10px;
+    }
+    
+    /* Small screen image fixes */
+    .post-content img {
+      margin: 12px auto;
+      border-radius: 4px;
+      max-width: calc(100% - 8px);
+    }
+    
+    /* Force everything to fit */
+    * {
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <main>
+      <section class="panel">
+        <div class="brand-container">
+          <div class="brand">BRC-8888 Blog</div>
+          <div class="subtitle">Latest updates, news, and developments by Niseta Sigosi — Protocol Origin</div>
+          <div class="creator-signature">Niseta Sigosi — BRC-8888 Origin</div>
+        </div>
+        
+        <div id="posts">
+          <!-- Posts will be loaded here dynamically -->
+          <div class="post">
+            <div class="post-title">Loading updates...</div>
+            <div class="post-meta">Fetching the latest posts</div>
+            <div class="post-content">Please wait while we load the latest BRC-8888 updates.</div>
+          </div>
+        </div>
+      </section>
+    </main>
 
+    <aside class="panel sidebar">
+      <h3>Latest Posts</h3>
+      <ul id="latest-posts">
+        <li>Loading...</li>
+      </ul>
+      
+      <div style="margin-top:16px">
+        <div class="tiny">Quick Links</div>
+        <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+          <a class="link" href="https://nisetasigosi.github.io/brc-8888/" target="_blank">Main Site</a>
+          <a class="link" href="https://github.com/NisetaSigosi/brc8888" target="_blank">GitHub</a>
+          <a class="link" href="https://ord.io" target="_blank">Ord.io</a>
+        </div>
+      </div>
+      
+      <div style="margin-top:20px">
+        <div class="tiny">Protocol Info</div>
+        <div style="margin-top:8px;font-size:13px;color:rgba(0,0,0,0.65);line-height:1.4">
+          BRC-8888: Bitcoin-native protocol for stateful, evolving, AI-aware, PQ digital objects on Ordinals.
+        </div>
+      </div>
+      
+      <button class="more-btn" id="more-btn" style="margin-top:20px">Load More Posts</button>
+    </aside>
+  </div>
+
+  <footer class="panel" style="margin-top:16px">
+    <div class="tiny">Contact: <a class="link" href="mailto:NisetaSigosi@proton.me">NisetaSigosi@proton.me</a></div>
+    <div class="tiny">© 2025 BRC-8888 Protocol — All updates permanently archived on GitHub | <a class="link" href="https://github.com/NisetaSigosi/brc8888" target="_blank">github.com/NisetaSigosi/brc8888</a></div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const postsContainer = document.getElementById('posts');
+    const latestPosts = document.getElementById('latest-posts');
+    const moreBtn = document.getElementById('more-btn');
+    let allPosts = [];
+    let visiblePosts = 3;
+
+    // Fetch post list from posts.json
+    fetch('posts.json')
+      .then(r => r.json())
+      .then(posts => {
+        allPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        // Clear loading messages
+        postsContainer.innerHTML = '';
+        latestPosts.innerHTML = '';
+        
+        // Show latest posts in sidebar
+        allPosts.slice(0, 3).forEach(p => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="#post-${p.file.split('/').pop().replace('.md', '')}">${p.title}</a><small>${p.date}</small>`;
+          latestPosts.appendChild(li);
+        });
+        
+        // Load initial posts
+        loadPosts();
+        
+        // More button functionality
+        if (allPosts.length <= 3) {
+          moreBtn.style.display = 'none';
+        }
+        moreBtn.addEventListener('click', () => {
+          visiblePosts = Math.min(visiblePosts + 3, allPosts.length);
+          loadPosts();
+          if (visiblePosts >= allPosts.length) {
+            moreBtn.textContent = 'All posts loaded';
+            moreBtn.disabled = true;
+          }
+        });
+      })
+      .catch(err => {
+        console.error('Error loading posts:', err);
+        postsContainer.innerHTML = `
+          <div class="post">
+            <div class="post-title">Error Loading Posts</div>
+            <div class="post-content">Could not load blog posts. Please check if posts.json exists.</div>
+          </div>
+        `;
+      });
+
+    function loadPosts() {
+      const postsToShow = allPosts.slice(0, visiblePosts);
+      
+      // Clear and reload posts
+      postsContainer.innerHTML = '';
+      
+      postsToShow.forEach(p => {
+        fetch(p.file)
+          .then(r => r.text())
+          .then(text => {
+            const article = document.createElement('article');
+            article.className = 'post';
+            article.id = `post-${p.file.split('/').pop().replace('.md', '')}`;
+            
+            // Convert markdown to HTML
+            const htmlContent = marked.parse(text);
+            
+            article.innerHTML = `
+              <h2 class="post-title">${p.title}</h2>
+              <div class="post-meta">By ${p.author} — ${p.date}</div>
+              <div class="post-content">${htmlContent}</div>
+              <div class="hashtags">${p.hashtags}</div>
+              <div class="share-buttons">
+                <a class="share-btn" href="https://x.com/intent/tweet?text=${encodeURIComponent(p.title + ' — BRC-8888 Update by Niseta Sigosi')}&url=${encodeURIComponent(window.location.origin + window.location.pathname + '#' + article.id)}" target="_blank">Share on X</a>
+                <button class="copy-btn share-btn" onclick="navigator.clipboard.writeText(window.location.origin + window.location.pathname + '#' + '${article.id}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Link', 2000);">Copy Link</button>
+              </div>
+            `;
+            postsContainer.appendChild(article);
+          })
+          .catch(err => {
+            console.error('Error loading post:', p.file, err);
+            const article = document.createElement('article');
+            article.className = 'post';
+            article.innerHTML = `
+              <h2 class="post-title">${p.title}</h2>
+              <div class="post-meta">By ${p.author} — ${p.date}</div>
+              <div class="post-content">Error loading this post. Please check if the markdown file exists.</div>
+              <div class="hashtags">${p.hashtags}</div>
+            `;
+            postsContainer.appendChild(article);
+          });
+      });
+    }
+
+    // Smooth scroll to anchor links
+    document.addEventListener('click', function(e) {
+      if (e.target.tagName === 'A' && e.target.getAttribute('href')?.startsWith('#')) {
+        e.preventDefault();
+        const targetId = e.target.getAttribute('href').substring(1);
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 20,
+            behavior: 'smooth'
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
