@@ -1,4 +1,4 @@
-![BRC-8888 Quantum Shield](https://github.com/NisetaSigosi/brc-8888/blob/main/images/1.webp)
+![BRC-8888 Quantum Shield](https://raw.githubusercontent.com/NisetaSigosi/brc-8888/main/images/1.webp)
 
 Today marks the official public introduction of **BRC-8888**, the first Bitcoin-native protocol that brings true stateful, evolvable, and post-quantum-secure digital objects directly on top of Ordinals inscriptions — without sidechains, wrapped tokens, or consensus changes.
 
@@ -32,7 +32,7 @@ The first object deployed on BRC-8888 is **UNQ — Quantum Edge**:
 
 UNQ demonstrates every feature of BRC-8888 in production: phased minting, treasury routing, founder vesting, and future AI trait unlocks, and post-quantum-signed evolutions.
 
-![UNQ Quantum Edge](https://github.com/NisetaSigosi/brc-8888/blob/main/images/2.jpeg)
+![UNQ Quantum Edge](https://raw.githubusercontent.com/NisetaSigosi/brc-8888/main/images/2.jpeg)
 
 ### Technical Strengths Built for 2025–2030
 
