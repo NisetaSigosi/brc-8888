@@ -610,6 +610,38 @@ body[data-theme="light"] .phase-group {
   visibility: visible;
   opacity: 1;
 }
+
+/* Add to your CSS section */
+.nav a.blog-button {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.03);
+  padding: 14px;
+  text-align: left;
+  border-radius: 10px;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 15px;
+  transition: all .12s;
+  width: 100%;
+  text-decoration: none;
+  display: block;
+  font-family: var(--mono);
+}
+
+body[data-theme="dark"] .nav a.blog-button:hover {
+  background: var(--accent-dark);
+  color: var(--bg-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+body[data-theme="light"] .nav a.blog-button:hover {
+  background: var(--accent-light);
+  color: var(--bg-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
 </style>
 </head>
 <body data-theme="dark">
@@ -630,15 +662,16 @@ body[data-theme="light"] .phase-group {
     <button class="mobile-menu-toggle" id="mobile-menu-toggle">☰ Menu</button>
    
     <nav class="nav" id="menu">
-      <button data-tab="mint-unq" class="active">▶ Mint Quantum Edge (UNQ)</button>
-      <button data-tab="create-token">🛠 Deploy Object</button>
-      <button data-tab="mint-token">⚡ Mint Token</button>
-      <button data-tab="transfer-token">↔ Transfer</button>
-      <button data-tab="evolve-object">🔄 Evolve Object</button>
-      <button data-tab="stats">📊 Live Stats</button>
-      <button data-tab="instructions">❓ Instructions</button>
-      <div style="margin-top:12px" class="tiny">JSON Tools & Provider Integration (UniSat/Xverse)</div>
-    </nav>
+  <button data-tab="mint-unq" class="active">▶ Mint Quantum Edge (UNQ)</button>
+  <button data-tab="create-token">🛠 Deploy Object</button>
+  <button data-tab="mint-token">⚡ Mint Token</button>
+  <button data-tab="transfer-token">↔ Transfer</button>
+  <button data-tab="evolve-object">🔄 Evolve Object</button>
+  <button data-tab="stats">📊 Live Stats</button>
+  <button data-tab="instructions">❓ Instructions</button>
+  <a href="/brc-8888/blog/" target="_blank" class="blog-button">📝 Blog</a>
+  <div style="margin-top:12px" class="tiny">JSON Tools & Provider Integration (UniSat/Xverse)</div>
+</nav>
     <div style="margin-top:16px">
       <div class="tiny">Quick Links</div>
       <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
