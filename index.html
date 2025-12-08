@@ -66,7 +66,7 @@ body[data-theme="light"] .creator-signature {
 }
 /* LEFT-JUSTIFIED MOBILE-RESPONSIVE NAVIGATION */
 .nav{margin-top:18px;display:flex;flex-direction:column;gap:10px}
-.nav button{
+.nav button, .nav a.blog-button {
   background:transparent;
   border:1px solid rgba(255,255,255,0.03);
   padding:14px;
@@ -77,15 +77,20 @@ body[data-theme="light"] .creator-signature {
   font-weight:900;
   font-size:15px;
   transition:all .12s;
-  width:100%
+  width:100%;
+  text-decoration:none; /* For blog button */
+  display:block; /* For blog button */
+  font-family:var(--mono); /* For blog button */
 }
-body[data-theme="dark"] .nav button:hover {
+body[data-theme="dark"] .nav button:hover,
+body[data-theme="dark"] .nav a.blog-button:hover {
   background: var(--accent-dark);
   color: var(--bg-dark);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-body[data-theme="light"] .nav button:hover {
+body[data-theme="light"] .nav button:hover,
+body[data-theme="light"] .nav a.blog-button:hover {
   background: var(--accent-light);
   color: var(--bg-light);
   transform: translateY(-2px);
@@ -190,7 +195,7 @@ body[data-theme="light"] pre.output {
     flex-direction: column;
   }
  
-  .nav button {
+  .nav button, .nav a.blog-button {
     width: 100%;
     text-align: left; /* Maintain left alignment on mobile */
   }
@@ -226,7 +231,7 @@ body[data-theme="light"] pre.output {
     display: flex;
   }
  
-  .nav button {
+  .nav button, .nav a.blog-button {
     padding: 12px 14px;
     font-size: 14px;
   }
@@ -609,38 +614,6 @@ body[data-theme="light"] .phase-group {
 .field.error .validation-tooltip {
   visibility: visible;
   opacity: 1;
-}
-
-/* Add to your CSS section */
-.nav a.blog-button {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.03);
-  padding: 14px;
-  text-align: left;
-  border-radius: 10px;
-  color: inherit;
-  cursor: pointer;
-  font-weight: 900;
-  font-size: 15px;
-  transition: all .12s;
-  width: 100%;
-  text-decoration: none;
-  display: block;
-  font-family: var(--mono);
-}
-
-body[data-theme="dark"] .nav a.blog-button:hover {
-  background: var(--accent-dark);
-  color: var(--bg-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-body[data-theme="light"] .nav a.blog-button:hover {
-  background: var(--accent-light);
-  color: var(--bg-light);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 </style>
 </head>
