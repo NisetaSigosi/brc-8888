@@ -33,7 +33,6 @@ The first object deployed on BRC-8888 is **UNQ — Quantum Edge**:
 UNQ demonstrates every feature of BRC-8888 in production: phased minting, treasury routing, founder vesting, and future AI trait unlocks, and post-quantum-signed evolutions.
 
 ![UNQ Quantum Edge](https://github.com/NisetaSigosi/brc-8888/blob/main/images/2.jpeg)
-*UNQ — Quantum Edge — the genesis object of BRC-8888*
 
 ### Technical Strengths Built for 2025–2030
 
