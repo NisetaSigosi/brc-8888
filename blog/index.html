@@ -333,22 +333,22 @@
     margin-bottom: 12px;
     font-size: 14px;
     font-weight: 900;
-  }
-  
-  .sidebar a {
-    color: var(--muted-light);
-    text-decoration: none;
-    display: block;
+    cursor: pointer;
     padding: 8px 0;
     border-bottom: 1px dashed rgba(0,0,0,0.04);
     transition: all 0.2s;
-    cursor: pointer;
   }
   
-  .sidebar a:hover {
+  .sidebar li:hover {
     color: var(--accent-light);
     padding-left: 8px;
     border-bottom: 1px solid var(--accent-light);
+  }
+  
+  .sidebar a {
+    color: inherit;
+    text-decoration: none;
+    display: block;
   }
   
   .sidebar small {
@@ -375,17 +375,11 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
   }
   
-  .top-post a {
-    border-bottom: none !important;
-    padding: 0 !important;
-    text-decoration: none;
+  .top-post-title {
     color: var(--muted-light);
+    text-decoration: none;
     display: block;
-    cursor: pointer;
-  }
-  
-  .top-post a:hover {
-    color: var(--accent-light);
+    font-weight: 900;
   }
   
   .top-post small {
@@ -418,32 +412,31 @@
     font-weight: 900;
     padding: 4px 0;
     border-bottom: 1px dashed rgba(0,0,0,0.04);
+    cursor: pointer;
   }
   
   .all-posts-list li:hover {
     background: rgba(0,0,0,0.02);
+    color: var(--accent-light);
   }
   
   .all-posts-list li:last-child {
     border-bottom: none;
   }
   
-  .all-posts-list a {
-    color: var(--muted-light);
-    text-decoration: none;
-    display: block;
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-  
-  .all-posts-list a:hover {
-    color: var(--accent-light);
-  }
-  
   .all-posts-list small {
     font-size: 11px;
     color: rgba(0,0,0,0.45);
     margin-left: 4px;
+  }
+  
+  /* Active post in sidebar */
+  .active-post {
+    color: var(--accent-light) !important;
+    font-weight: 900 !important;
+    background: rgba(0,107,79,0.05);
+    border-left: 3px solid var(--accent-light);
+    padding-left: 8px !important;
   }
   
   /* Scrollbar styling */
@@ -463,6 +456,14 @@
   
   .all-posts-section::-webkit-scrollbar-thumb:hover {
     background: rgba(0,107,79,0.4);
+  }
+  
+  /* Loading indicator */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--accent-light);
+    font-weight: 900;
   }
   
   /* Footer and links */
@@ -626,11 +627,9 @@
         </div>
         
         <div id="posts">
-          <!-- Posts will be loaded here dynamically -->
-          <div class="post">
-            <div class="post-title">Loading updates...</div>
-            <div class="post-meta">Fetching the latest posts</div>
-            <div class="post-content">Please wait while we load the latest BRC-8888 updates.</div>
+          <!-- Only ONE article will be loaded here at a time -->
+          <div class="loading" id="current-post">
+            Loading the latest article...
           </div>
         </div>
       </section>
@@ -669,8 +668,6 @@
           BRC-8888: Bitcoin-native protocol for stateful, evolving, AI-aware, PQ digital objects on Ordinals.
         </div>
       </div>
-      
-      <button class="more-btn" id="more-btn" style="margin-top:20px">Load More Posts</button>
     </aside>
   </div>
 
@@ -682,12 +679,13 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     const postsContainer = document.getElementById('posts');
+    const currentPostContainer = document.getElementById('current-post');
     const latestPosts = document.getElementById('latest-posts');
     const topPostsContainer = document.getElementById('top-posts');
     const allPostsList = document.getElementById('all-posts-list');
-    const moreBtn = document.getElementById('more-btn');
+    
     let allPosts = [];
-    let visiblePosts = 3;
+    let currentPostIndex = 0;
 
     // Fetch post list from posts.json
     fetch('posts.json')
@@ -697,58 +695,65 @@
         allPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
         
         // Clear loading messages
-        postsContainer.innerHTML = '';
         latestPosts.innerHTML = '';
         topPostsContainer.innerHTML = '';
         allPostsList.innerHTML = '';
         
-        // Show latest posts in sidebar (always newest 3) - WITH DIRECT LINKS
-        allPosts.slice(0, 3).forEach(p => {
+        // Load the first (latest) post by default
+        loadPost(0);
+        
+        // Show latest posts in sidebar (always newest 3)
+        allPosts.slice(0, 3).forEach((p, index) => {
           const li = document.createElement('li');
-          const postSlug = p.file.split('/').pop().replace('.md', '');
-          li.innerHTML = `<a href="${p.file}" data-post-id="post-${postSlug}">${p.title}</a><small>${p.date}</small>`;
+          li.setAttribute('data-post-index', index);
+          li.innerHTML = `${p.title}<small>${p.date}</small>`;
           latestPosts.appendChild(li);
+          
+          // Make it clickable
+          li.addEventListener('click', () => {
+            loadPost(index);
+            highlightActivePost(index);
+          });
         });
         
         // Show top posts (same as latest posts, but with better styling)
-        allPosts.slice(0, 3).forEach(p => {
+        allPosts.slice(0, 3).forEach((p, index) => {
           const div = document.createElement('div');
           div.className = 'top-post';
-          const postSlug = p.file.split('/').pop().replace('.md', '');
+          div.setAttribute('data-post-index', index);
           div.innerHTML = `
-            <a href="${p.file}" data-post-id="post-${postSlug}">${p.title}</a>
+            <div class="top-post-title">${p.title}</div>
             <small>${p.date}</small>
           `;
           topPostsContainer.appendChild(div);
+          
+          // Make it clickable
+          div.addEventListener('click', () => {
+            loadPost(index);
+            highlightActivePost(index);
+          });
         });
         
-        // Show all posts in reverse chronological order - WITH DIRECT LINKS
-        allPosts.forEach(p => {
+        // Show all posts in reverse chronological order
+        allPosts.forEach((p, index) => {
           const li = document.createElement('li');
-          const postSlug = p.file.split('/').pop().replace('.md', '');
-          li.innerHTML = `<a href="${p.file}" data-post-id="post-${postSlug}">${p.title}</a><small>${p.date}</small>`;
+          li.setAttribute('data-post-index', index);
+          li.innerHTML = `${p.title}<small>${p.date}</small>`;
           allPostsList.appendChild(li);
+          
+          // Make it clickable
+          li.addEventListener('click', () => {
+            loadPost(index);
+            highlightActivePost(index);
+          });
         });
         
-        // Load initial posts (newest first)
-        loadInitialPosts();
-        
-        // More button functionality
-        if (allPosts.length <= 3) {
-          moreBtn.style.display = 'none';
-        }
-        moreBtn.addEventListener('click', () => {
-          visiblePosts = Math.min(visiblePosts + 3, allPosts.length);
-          loadPosts(allPosts.slice(0, visiblePosts));
-          if (visiblePosts >= allPosts.length) {
-            moreBtn.textContent = 'All posts loaded';
-            moreBtn.disabled = true;
-          }
-        });
+        // Highlight first post as active initially
+        highlightActivePost(0);
       })
       .catch(err => {
         console.error('Error loading posts:', err);
-        postsContainer.innerHTML = `
+        currentPostContainer.innerHTML = `
           <div class="post">
             <div class="post-title">Error Loading Posts</div>
             <div class="post-content">Could not load blog posts. Please check if posts.json exists.</div>
@@ -756,178 +761,67 @@
         `;
       });
 
-    function loadInitialPosts() {
-      const postsToShow = allPosts.slice(0, visiblePosts);
-      loadPosts(postsToShow);
-    }
-
-    function loadPosts(postsToShow) {
-      postsToShow.forEach(p => {
-        fetchPost(p);
-      });
-    }
-
-    function fetchPost(postData) {
+    function loadPost(index) {
+      if (index < 0 || index >= allPosts.length) return;
+      
+      currentPostIndex = index;
+      const postData = allPosts[index];
+      
+      // Show loading
+      currentPostContainer.innerHTML = '<div class="loading">Loading article...</div>';
+      
+      // Fetch the markdown file
       fetch(postData.file)
         .then(r => r.text())
         .then(text => {
-          const article = document.createElement('article');
-          article.className = 'post';
-          const postSlug = postData.file.split('/').pop().replace('.md', '');
-          article.id = `post-${postSlug}`;
-          
           // Convert markdown to HTML
           const htmlContent = marked.parse(text);
           
-          article.innerHTML = `
-            <h2 class="post-title">${postData.title}</h2>
-            <div class="post-meta">By ${postData.author} — ${postData.date}</div>
-            <div class="post-content">${htmlContent}</div>
-            <div class="hashtags">${postData.hashtags}</div>
-            <div class="share-buttons">
-              <a class="share-btn" href="https://x.com/intent/tweet?text=${encodeURIComponent(postData.title + ' — BRC-8888 Update by Niseta Sigosi')}&url=${encodeURIComponent(window.location.origin + window.location.pathname + '#' + article.id)}" target="_blank">Share on X</a>
-              <button class="copy-btn share-btn" onclick="navigator.clipboard.writeText(window.location.origin + window.location.pathname + '#' + '${article.id}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Link', 2000);">Copy Link</button>
-            </div>
+          // Create the post HTML
+          const postHTML = `
+            <article class="post">
+              <h2 class="post-title">${postData.title}</h2>
+              <div class="post-meta">By ${postData.author} — ${postData.date}</div>
+              <div class="post-content">${htmlContent}</div>
+              <div class="hashtags">${postData.hashtags}</div>
+              <div class="share-buttons">
+                <a class="share-btn" href="https://x.com/intent/tweet?text=${encodeURIComponent(postData.title + ' — BRC-8888 Update by Niseta Sigosi')}&url=${encodeURIComponent(window.location.origin + window.location.pathname)}" target="_blank">Share on X</a>
+                <button class="copy-btn share-btn" onclick="navigator.clipboard.writeText(window.location.origin + window.location.pathname); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Link', 2000);">Copy Link</button>
+              </div>
+            </article>
           `;
           
-          // Check if post already exists in DOM
-          const existingPost = document.getElementById(article.id);
-          if (existingPost) {
-            existingPost.replaceWith(article);
-          } else {
-            postsContainer.appendChild(article);
-          }
+          // Replace the current post
+          currentPostContainer.innerHTML = postHTML;
+          
+          // Scroll to top of the post
+          window.scrollTo({ top: postsContainer.offsetTop - 20, behavior: 'smooth' });
         })
         .catch(err => {
           console.error('Error loading post:', postData.file, err);
-          const article = document.createElement('article');
-          article.className = 'post';
-          const postSlug = postData.file.split('/').pop().replace('.md', '');
-          article.id = `post-${postSlug}`;
-          article.innerHTML = `
-            <h2 class="post-title">${postData.title}</h2>
-            <div class="post-meta">By ${postData.author} — ${postData.date}</div>
-            <div class="post-content">Error loading this post. Please check if the markdown file exists at: ${postData.file}</div>
-            <div class="hashtags">${postData.hashtags}</div>
+          currentPostContainer.innerHTML = `
+            <article class="post">
+              <h2 class="post-title">${postData.title}</h2>
+              <div class="post-meta">By ${postData.author} — ${postData.date}</div>
+              <div class="post-content">Error loading this post. Please check if the markdown file exists: ${postData.file}</div>
+              <div class="hashtags">${postData.hashtags}</div>
+            </article>
           `;
-          
-          const existingPost = document.getElementById(article.id);
-          if (existingPost) {
-            existingPost.replaceWith(article);
-          } else {
-            postsContainer.appendChild(article);
-          }
         });
     }
 
-    // Handle clicks on sidebar links - they should navigate to the post
-    document.addEventListener('click', function(e) {
-      let target = e.target;
-      
-      // If clicked on a sidebar link
-      if (target.tagName === 'A' && target.hasAttribute('href') && !target.classList.contains('link')) {
-        const href = target.getAttribute('href');
-        
-        // Check if it's a markdown file link (not external link)
-        if (href.endsWith('.md')) {
-          e.preventDefault();
-          
-          // Find the post data
-          const postData = allPosts.find(p => p.file === href);
-          if (!postData) return;
-          
-          // Check if post is already loaded
-          const postSlug = href.split('/').pop().replace('.md', '');
-          const postElement = document.getElementById(`post-${postSlug}`);
-          
-          if (postElement) {
-            // Post is already loaded, scroll to it
-            window.scrollTo({
-              top: postElement.offsetTop - 20,
-              behavior: 'smooth'
-            });
-            
-            // Highlight briefly
-            const originalBg = postElement.style.backgroundColor;
-            postElement.style.backgroundColor = 'rgba(0,107,79,0.05)';
-            setTimeout(() => {
-              postElement.style.backgroundColor = originalBg;
-            }, 1000);
-          } else {
-            // Post not loaded yet, load it
-            fetchPost(postData);
-            
-            // Wait a bit for the post to load, then scroll to it
-            setTimeout(() => {
-              const newPostElement = document.getElementById(`post-${postSlug}`);
-              if (newPostElement) {
-                window.scrollTo({
-                  top: newPostElement.offsetTop - 20,
-                  behavior: 'smooth'
-                });
-                
-                // Highlight briefly
-                const originalBg = newPostElement.style.backgroundColor;
-                newPostElement.style.backgroundColor = 'rgba(0,107,79,0.05)';
-                setTimeout(() => {
-                  newPostElement.style.backgroundColor = originalBg;
-                }, 1000);
-              }
-            }, 300);
-          }
-        }
-      }
-      
-      // Handle clicks on top-post divs
-      if (target.classList.contains('top-post')) {
-        const link = target.querySelector('a');
-        if (link) {
-          e.preventDefault();
-          link.click();
-        }
-      }
-      
-      // Handle clicks on list items in all-posts
-      if (target.tagName === 'LI' && target.parentElement.classList.contains('all-posts-list')) {
-        const link = target.querySelector('a');
-        if (link) {
-          e.preventDefault();
-          link.click();
-        }
-      }
-    });
-
-    // Highlight current post in sidebar when scrolling
-    window.addEventListener('scroll', function() {
-      const posts = document.querySelectorAll('.post');
-      const sidebarLinks = document.querySelectorAll('.sidebar a[data-post-id]');
-      
-      let currentPost = null;
-      
-      posts.forEach(post => {
-        const rect = post.getBoundingClientRect();
-        if (rect.top <= 100 && rect.bottom >= 100) {
-          currentPost = post.id;
-        }
+    function highlightActivePost(index) {
+      // Remove active class from all sidebar items
+      document.querySelectorAll('.sidebar li, .top-post').forEach(item => {
+        item.classList.remove('active-post');
       });
       
-      // Remove active class from all links
-      sidebarLinks.forEach(link => {
-        link.classList.remove('active');
-        link.style.color = '';
-        link.style.fontWeight = '';
+      // Add active class to clicked item
+      const clickedItems = document.querySelectorAll(`[data-post-index="${index}"]`);
+      clickedItems.forEach(item => {
+        item.classList.add('active-post');
       });
-      
-      // Add active class to current post link
-      if (currentPost) {
-        const currentLinks = document.querySelectorAll(`.sidebar a[data-post-id="${currentPost}"]`);
-        currentLinks.forEach(link => {
-          link.classList.add('active');
-          link.style.color = 'var(--accent-light)';
-          link.style.fontWeight = '900';
-        });
-      }
-    });
+    }
   </script>
 </body>
 </html>
