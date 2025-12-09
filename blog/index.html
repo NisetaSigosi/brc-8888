@@ -608,83 +608,6 @@ body[data-theme="dark"] .view-counter:hover {
     let allPosts = [];
     let visiblePosts = 3;
 
-    // SIMPLE VIEW COUNTER - GUARANTEED TO WORK
-    const BlogViews = {
-        storageKey: 'brc8888_blog_views',
-        sessionKey: 'brc8888_viewed_',
-        
-        init() {
-            this.views = this.loadViews();
-        },
-        
-        loadViews() {
-            try {
-                const saved = localStorage.getItem(this.storageKey);
-                return saved ? JSON.parse(saved) : {};
-            } catch {
-                return {};
-            }
-        },
-        
-        saveViews() {
-            localStorage.setItem(this.storageKey, JSON.stringify(this.views));
-        },
-        
-        get(postId) {
-            return this.views[postId] || 0;
-        },
-        
-        increment(postId) {
-            // Create post entry if doesn't exist
-            if (!this.views[postId]) {
-                this.views[postId] = 0;
-            }
-            
-            // Check if already viewed in this session
-            const sessionKey = this.sessionKey + postId;
-            if (sessionStorage.getItem(sessionKey)) {
-                return this.views[postId]; // Don't increment
-            }
-            
-            // Increment and save
-            this.views[postId]++;
-            this.saveViews();
-            
-            // Mark as viewed in this session
-            sessionStorage.setItem(sessionKey, '1');
-            
-            // Update display immediately
-            this.updateDisplay(postId);
-            
-            return this.views[postId];
-        },
-        
-        updateDisplay(postId) {
-            const element = document.getElementById(`view-count-${postId}`);
-            if (element) {
-                const count = this.get(postId);
-                element.innerHTML = `
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    ${count} views
-                `;
-            }
-        },
-        
-        // Track view when post loads
-        trackViewOnLoad(postId) {
-            // Small delay to ensure post is rendered
-            setTimeout(() => {
-                this.increment(postId);
-            }, 300);
-        }
-    };
-
-    // Initialize view counter
-    BlogViews.init();
-
     // Fetch post list from posts.json
     fetch('posts.json')
       .then(r => r.json())
@@ -697,13 +620,8 @@ body[data-theme="dark"] .view-counter:hover {
         
         // Show latest posts in sidebar
         allPosts.slice(0, 3).forEach(p => {
-          const postId = p.file.split('/').pop().replace('.md', '');
-          const views = BlogViews.get(postId);
           const li = document.createElement('li');
-          li.innerHTML = `
-            <a href="#post-${postId}">${p.title}</a>
-            <small>${p.date} • ${views} views</small>
-          `;
+          li.innerHTML = `<a href="#post-${p.file.split('/').pop().replace('.md', '')}">${p.title}</a><small>${p.date}</small>`;
           latestPosts.appendChild(li);
         });
         
@@ -743,47 +661,29 @@ body[data-theme="dark"] .view-counter:hover {
         fetch(p.file)
           .then(r => r.text())
           .then(text => {
-            const postId = p.file.split('/').pop().replace('.md', '');
             const article = document.createElement('article');
             article.className = 'post';
-            article.id = `post-${postId}`;
+            article.id = `post-${p.file.split('/').pop().replace('.md', '')}`;
             
             // Convert markdown to HTML
             const htmlContent = marked.parse(text);
             
-            // Get view count
-            const views = BlogViews.get(postId);
-            
             article.innerHTML = `
               <h2 class="post-title">${p.title}</h2>
-              <div class="post-meta">
-                By ${p.author} — ${p.date} 
-                <span class="view-counter" id="view-count-${postId}">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                  ${views} views
-                </span>
-              </div>
+              <div class="post-meta">By ${p.author} — ${p.date}</div>
               <div class="post-content">${htmlContent}</div>
               <div class="hashtags">${p.hashtags}</div>
               <div class="share-buttons">
                 <a class="share-btn" href="https://x.com/intent/tweet?text=${encodeURIComponent(p.title + ' — BRC-8888 Update by Niseta Sigosi')}&url=${encodeURIComponent(window.location.origin + window.location.pathname + '#' + article.id)}" target="_blank">Share on X</a>
-                <button class="copy-btn share-btn" onclick="navigator.clipboard.writeText('${window.location.origin + window.location.pathname}#post-${postId}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Link', 2000);">Copy Link</button>
+                <button class="copy-btn share-btn" onclick="navigator.clipboard.writeText(window.location.origin + window.location.pathname + '#' + '${article.id}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Link', 2000);">Copy Link</button>
               </div>
             `;
             postsContainer.appendChild(article);
-            
-            // TRACK VIEW WHEN POST IS ADDED TO PAGE
-            BlogViews.trackViewOnLoad(postId);
           })
           .catch(err => {
             console.error('Error loading post:', p.file, err);
-            const postId = p.file.split('/').pop().replace('.md', '');
             const article = document.createElement('article');
             article.className = 'post';
-            article.id = `post-${postId}`;
             article.innerHTML = `
               <h2 class="post-title">${p.title}</h2>
               <div class="post-meta">By ${p.author} — ${p.date}</div>
@@ -809,6 +709,6 @@ body[data-theme="dark"] .view-counter:hover {
         }
       }
     });
-</script>
+  </script>
 </body>
 </html>
