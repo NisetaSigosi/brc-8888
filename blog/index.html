@@ -191,7 +191,7 @@
     margin-bottom: 16px;
   }
   
-  /* FIXED: Post content with proper text wrapping */
+  /* FIXED: Post content with proper text wrapping - KEEP LEFT ALIGNED */
   .post-content {
     line-height: 1.6;
     margin-bottom: 16px;
@@ -201,16 +201,33 @@
     hyphens: auto;
     width: 100%;
     box-sizing: border-box;
+    text-align: left !important; /* Force left align */
   }
   
-  .post-content h3 {
+  /* Ensure all markdown elements are left aligned */
+  .post-content h1,
+  .post-content h2,
+  .post-content h3,
+  .post-content h4,
+  .post-content h5,
+  .post-content h6 {
     color: var(--accent-light);
-    font-size: 16px;
     margin-top: 20px;
+    margin-bottom: 10px;
+    text-align: left !important;
+    font-weight: 900;
   }
+  
+  .post-content h1 { font-size: 24px; }
+  .post-content h2 { font-size: 22px; }
+  .post-content h3 { font-size: 20px; }
+  .post-content h4 { font-size: 18px; }
+  .post-content h5 { font-size: 16px; }
+  .post-content h6 { font-size: 14px; }
   
   .post-content p {
     margin-bottom: 12px;
+    text-align: left !important;
   }
   
   /* Fixed code blocks */
@@ -228,6 +245,7 @@
     word-wrap: break-word;
     max-width: 100%;
     box-sizing: border-box;
+    text-align: left !important;
   }
   
   .post-content code {
@@ -237,6 +255,7 @@
     font-size: 14px;
     white-space: normal;
     word-break: break-word;
+    text-align: left !important;
   }
   
   /* FIXED: Responsive images */
@@ -270,11 +289,57 @@
     font-style: italic;
   }
   
+  /* Tables */
+  .post-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    text-align: left;
+  }
+  
+  .post-content th {
+    background: rgba(0,107,79,0.05);
+    color: var(--accent-light);
+    font-weight: 900;
+    padding: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  
+  .post-content td {
+    padding: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  
+  .post-content tr:nth-child(even) {
+    background: rgba(0,0,0,0.02);
+  }
+  
+  /* Lists */
+  .post-content ul,
+  .post-content ol {
+    margin: 16px 0;
+    padding-left: 20px;
+    text-align: left;
+  }
+  
+  .post-content li {
+    margin-bottom: 8px;
+  }
+  
+  .post-content blockquote {
+    border-left: 4px solid var(--accent-light);
+    padding-left: 16px;
+    margin: 20px 0;
+    color: var(--muted2-light);
+    font-style: italic;
+  }
+  
   .hashtags {
     color: var(--accent-light);
     font-weight: 900;
     font-size: 13px;
     margin-top: 16px;
+    text-align: left !important;
   }
   
   /* Share buttons */
@@ -678,6 +743,14 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
+    // Configure marked to NOT add any extra styling
+    marked.setOptions({
+      headerIds: false,
+      mangle: false,
+      breaks: true,
+      gfm: true
+    });
+    
     const postsContainer = document.getElementById('posts');
     const currentPostContainer = document.getElementById('current-post');
     const latestPosts = document.getElementById('latest-posts');
@@ -754,10 +827,10 @@
       .catch(err => {
         console.error('Error loading posts:', err);
         currentPostContainer.innerHTML = `
-          <div class="post">
-            <div class="post-title">Error Loading Posts</div>
+          <article class="post">
+            <h2 class="post-title">Error Loading Posts</h2>
             <div class="post-content">Could not load blog posts. Please check if posts.json exists.</div>
-          </div>
+          </article>
         `;
       });
 
@@ -774,10 +847,10 @@
       fetch(postData.file)
         .then(r => r.text())
         .then(text => {
-          // Convert markdown to HTML
+          // Convert markdown to HTML but keep formatting
           const htmlContent = marked.parse(text);
           
-          // Create the post HTML
+          // Create the post HTML - KEEP ORIGINAL FORMATTING
           const postHTML = `
             <article class="post">
               <h2 class="post-title">${postData.title}</h2>
