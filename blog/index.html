@@ -608,85 +608,82 @@ body[data-theme="dark"] .view-counter:hover {
     let allPosts = [];
     let visiblePosts = 3;
 
-    // View Counter System
-    class ViewCounter {
-        constructor() {
-            this.storageKey = 'brc8888-blog-views';
+    // SIMPLE VIEW COUNTER - GUARANTEED TO WORK
+    const BlogViews = {
+        storageKey: 'brc8888_blog_views',
+        sessionKey: 'brc8888_viewed_',
+        
+        init() {
             this.views = this.loadViews();
-            this.sessionKey = 'brc8888-viewed-';
-        }
-
+        },
+        
         loadViews() {
             try {
-                return JSON.parse(localStorage.getItem(this.storageKey)) || {};
+                const saved = localStorage.getItem(this.storageKey);
+                return saved ? JSON.parse(saved) : {};
             } catch {
                 return {};
             }
-        }
-
+        },
+        
         saveViews() {
             localStorage.setItem(this.storageKey, JSON.stringify(this.views));
-        }
-
-        getViews(postId) {
+        },
+        
+        get(postId) {
             return this.views[postId] || 0;
-        }
-
-        incrementView(postId) {
+        },
+        
+        increment(postId) {
+            // Create post entry if doesn't exist
+            if (!this.views[postId]) {
+                this.views[postId] = 0;
+            }
+            
             // Check if already viewed in this session
             const sessionKey = this.sessionKey + postId;
             if (sessionStorage.getItem(sessionKey)) {
-                return this.getViews(postId); // Don't increment again
+                return this.views[postId]; // Don't increment
             }
-
-            // Increment count
-            this.views[postId] = (this.views[postId] || 0) + 1;
+            
+            // Increment and save
+            this.views[postId]++;
             this.saveViews();
             
             // Mark as viewed in this session
-            sessionStorage.setItem(sessionKey, 'true');
+            sessionStorage.setItem(sessionKey, '1');
             
-            // Update display
+            // Update display immediately
             this.updateDisplay(postId);
             
             return this.views[postId];
-        }
-
+        },
+        
         updateDisplay(postId) {
-            const viewElement = document.getElementById(`view-count-${postId}`);
-            if (viewElement) {
-                const count = this.getViews(postId);
-                viewElement.innerHTML = `
+            const element = document.getElementById(`view-count-${postId}`);
+            if (element) {
+                const count = this.get(postId);
+                element.innerHTML = `
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                     </svg>
-                    ${count.toLocaleString()} views
+                    ${count} views
                 `;
             }
+        },
+        
+        // Track view when post loads
+        trackViewOnLoad(postId) {
+            // Small delay to ensure post is rendered
+            setTimeout(() => {
+                this.increment(postId);
+            }, 300);
         }
-
-        // Track when post becomes visible
-        trackPostVisibility() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const postId = entry.target.id.replace('post-', '');
-                        this.incrementView(postId);
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.3 });
-
-            // Observe all posts
-            document.querySelectorAll('.post').forEach(post => {
-                observer.observe(post);
-            });
-        }
-    }
+    };
 
     // Initialize view counter
-    const viewCounter = new ViewCounter();
+    BlogViews.init();
 
     // Fetch post list from posts.json
     fetch('posts.json')
@@ -701,11 +698,11 @@ body[data-theme="dark"] .view-counter:hover {
         // Show latest posts in sidebar
         allPosts.slice(0, 3).forEach(p => {
           const postId = p.file.split('/').pop().replace('.md', '');
-          const views = viewCounter.getViews(postId);
+          const views = BlogViews.get(postId);
           const li = document.createElement('li');
           li.innerHTML = `
             <a href="#post-${postId}">${p.title}</a>
-            <small>${p.date} • ${views.toLocaleString()} views</small>
+            <small>${p.date} • ${views} views</small>
           `;
           latestPosts.appendChild(li);
         });
@@ -755,7 +752,7 @@ body[data-theme="dark"] .view-counter:hover {
             const htmlContent = marked.parse(text);
             
             // Get view count
-            const views = viewCounter.getViews(postId);
+            const views = BlogViews.get(postId);
             
             article.innerHTML = `
               <h2 class="post-title">${p.title}</h2>
@@ -766,7 +763,7 @@ body[data-theme="dark"] .view-counter:hover {
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                     <circle cx="12" cy="12" r="3"></circle>
                   </svg>
-                  ${views.toLocaleString()} views
+                  ${views} views
                 </span>
               </div>
               <div class="post-content">${htmlContent}</div>
@@ -777,6 +774,9 @@ body[data-theme="dark"] .view-counter:hover {
               </div>
             `;
             postsContainer.appendChild(article);
+            
+            // TRACK VIEW WHEN POST IS ADDED TO PAGE
+            BlogViews.trackViewOnLoad(postId);
           })
           .catch(err => {
             console.error('Error loading post:', p.file, err);
@@ -793,9 +793,6 @@ body[data-theme="dark"] .view-counter:hover {
             postsContainer.appendChild(article);
           });
       });
-
-      // Start tracking post visibility after posts are loaded
-      setTimeout(() => viewCounter.trackPostVisibility(), 100);
     }
 
     // Smooth scroll to anchor links
