@@ -488,6 +488,64 @@
       box-sizing: border-box;
     }
   }
+  /* View Counter Styles */
+.view-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--accent-light);
+    margin-left: 12px;
+    font-weight: 900;
+    padding: 4px 10px;
+    background: rgba(0,107,79,0.05);
+    border-radius: 20px;
+    border: 1px solid rgba(0,107,79,0.1);
+    transition: all 0.2s ease;
+}
+
+.view-counter svg {
+    opacity: 0.7;
+    width: 14px;
+    height: 14px;
+}
+
+.view-counter:hover {
+    background: rgba(0,107,79,0.1);
+    transform: translateY(-1px);
+}
+
+/* Dark mode */
+body[data-theme="dark"] .view-counter {
+    color: var(--accent-dark);
+    background: rgba(0,245,160,0.05);
+    border: 1px solid rgba(0,245,160,0.1);
+}
+
+body[data-theme="dark"] .view-counter:hover {
+    background: rgba(0,245,160,0.1);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .view-counter {
+        margin-left: 8px;
+        padding: 3px 8px;
+        font-size: 12px;
+    }
+    
+    .view-counter svg {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .sidebar li small {
+        font-size: 11px;
+        display: block;
+        margin-top: 2px;
+        color: rgba(0,0,0,0.45);
+    }
+}
 </style>
 </head>
 <body>
@@ -550,6 +608,86 @@
     let allPosts = [];
     let visiblePosts = 3;
 
+    // View Counter System
+    class ViewCounter {
+        constructor() {
+            this.storageKey = 'brc8888-blog-views';
+            this.views = this.loadViews();
+            this.sessionKey = 'brc8888-viewed-';
+        }
+
+        loadViews() {
+            try {
+                return JSON.parse(localStorage.getItem(this.storageKey)) || {};
+            } catch {
+                return {};
+            }
+        }
+
+        saveViews() {
+            localStorage.setItem(this.storageKey, JSON.stringify(this.views));
+        }
+
+        getViews(postId) {
+            return this.views[postId] || 0;
+        }
+
+        incrementView(postId) {
+            // Check if already viewed in this session
+            const sessionKey = this.sessionKey + postId;
+            if (sessionStorage.getItem(sessionKey)) {
+                return this.getViews(postId); // Don't increment again
+            }
+
+            // Increment count
+            this.views[postId] = (this.views[postId] || 0) + 1;
+            this.saveViews();
+            
+            // Mark as viewed in this session
+            sessionStorage.setItem(sessionKey, 'true');
+            
+            // Update display
+            this.updateDisplay(postId);
+            
+            return this.views[postId];
+        }
+
+        updateDisplay(postId) {
+            const viewElement = document.getElementById(`view-count-${postId}`);
+            if (viewElement) {
+                const count = this.getViews(postId);
+                viewElement.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    ${count.toLocaleString()} views
+                `;
+            }
+        }
+
+        // Track when post becomes visible
+        trackPostVisibility() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const postId = entry.target.id.replace('post-', '');
+                        this.incrementView(postId);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            // Observe all posts
+            document.querySelectorAll('.post').forEach(post => {
+                observer.observe(post);
+            });
+        }
+    }
+
+    // Initialize view counter
+    const viewCounter = new ViewCounter();
+
     // Fetch post list from posts.json
     fetch('posts.json')
       .then(r => r.json())
@@ -562,8 +700,13 @@
         
         // Show latest posts in sidebar
         allPosts.slice(0, 3).forEach(p => {
+          const postId = p.file.split('/').pop().replace('.md', '');
+          const views = viewCounter.getViews(postId);
           const li = document.createElement('li');
-          li.innerHTML = `<a href="#post-${p.file.split('/').pop().replace('.md', '')}">${p.title}</a><small>${p.date}</small>`;
+          li.innerHTML = `
+            <a href="#post-${postId}">${p.title}</a>
+            <small>${p.date} • ${views.toLocaleString()} views</small>
+          `;
           latestPosts.appendChild(li);
         });
         
@@ -603,29 +746,44 @@
         fetch(p.file)
           .then(r => r.text())
           .then(text => {
+            const postId = p.file.split('/').pop().replace('.md', '');
             const article = document.createElement('article');
             article.className = 'post';
-            article.id = `post-${p.file.split('/').pop().replace('.md', '')}`;
+            article.id = `post-${postId}`;
             
             // Convert markdown to HTML
             const htmlContent = marked.parse(text);
             
+            // Get view count
+            const views = viewCounter.getViews(postId);
+            
             article.innerHTML = `
               <h2 class="post-title">${p.title}</h2>
-              <div class="post-meta">By ${p.author} — ${p.date}</div>
+              <div class="post-meta">
+                By ${p.author} — ${p.date} 
+                <span class="view-counter" id="view-count-${postId}">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  ${views.toLocaleString()} views
+                </span>
+              </div>
               <div class="post-content">${htmlContent}</div>
               <div class="hashtags">${p.hashtags}</div>
               <div class="share-buttons">
                 <a class="share-btn" href="https://x.com/intent/tweet?text=${encodeURIComponent(p.title + ' — BRC-8888 Update by Niseta Sigosi')}&url=${encodeURIComponent(window.location.origin + window.location.pathname + '#' + article.id)}" target="_blank">Share on X</a>
-                <button class="copy-btn share-btn" onclick="navigator.clipboard.writeText(window.location.origin + window.location.pathname + '#' + '${article.id}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Link', 2000);">Copy Link</button>
+                <button class="copy-btn share-btn" onclick="navigator.clipboard.writeText('${window.location.origin + window.location.pathname}#post-${postId}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Link', 2000);">Copy Link</button>
               </div>
             `;
             postsContainer.appendChild(article);
           })
           .catch(err => {
             console.error('Error loading post:', p.file, err);
+            const postId = p.file.split('/').pop().replace('.md', '');
             const article = document.createElement('article');
             article.className = 'post';
+            article.id = `post-${postId}`;
             article.innerHTML = `
               <h2 class="post-title">${p.title}</h2>
               <div class="post-meta">By ${p.author} — ${p.date}</div>
@@ -635,6 +793,9 @@
             postsContainer.appendChild(article);
           });
       });
+
+      // Start tracking post visibility after posts are loaded
+      setTimeout(() => viewCounter.trackPostVisibility(), 100);
     }
 
     // Smooth scroll to anchor links
@@ -651,6 +812,6 @@
         }
       }
     });
-  </script>
+</script>
 </body>
 </html>
