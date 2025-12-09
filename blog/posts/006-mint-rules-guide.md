@@ -1,15 +1,3 @@
-Here's the markdown file for your 6th blog post (006-mint-rules-guide.md):
-
-```markdown
----
-title: "Understanding mint_rules in BRC-8888: Detailed Breakdown"
-date: "2025-12-14"
-author: "Niseta Sigosi"
-excerpt: "A comprehensive guide to BRC-8888's mint_rules object, explaining fair-launch mechanics, vesting schedules, and phased pricing for controlled token distribution."
----
-
-### Understanding mint_rules in BRC-8888: Detailed Breakdown
-
 In the BRC-8888 protocol, `mint_rules` is a key object defined during the deploy operation. It enforces fair-launch mechanics for minting new units of an object (e.g., tokens like UNQ). This ensures controlled distribution, prevents abuse (like sniping), and promotes equitable access. The rules are validated off-chain by indexers, making them mandatory for any valid mint inscription. Below, I break down each field in detail, with examples from the genesis UNQ deploy.
 
 #### Structure of mint_rules
