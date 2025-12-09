@@ -342,6 +342,7 @@
     padding: 8px 0;
     border-bottom: 1px dashed rgba(0,0,0,0.04);
     transition: all 0.2s;
+    cursor: pointer;
   }
   
   .sidebar a:hover {
@@ -365,6 +366,7 @@
     padding: 12px;
     margin-bottom: 12px;
     transition: all 0.2s;
+    cursor: pointer;
   }
   
   .top-post:hover {
@@ -376,12 +378,88 @@
   .top-post a {
     border-bottom: none !important;
     padding: 0 !important;
+    text-decoration: none;
+    color: var(--muted-light);
+    display: block;
+    cursor: pointer;
+  }
+  
+  .top-post a:hover {
+    color: var(--accent-light);
   }
   
   .top-post small {
     margin-top: 6px;
     color: var(--accent-light);
     font-weight: 700;
+    display: block;
+  }
+  
+  /* All posts section */
+  .all-posts-section {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 8px;
+    padding: 12px;
+    background: rgba(0,0,0,0.01);
+  }
+  
+  .all-posts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .all-posts-list li {
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 900;
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(0,0,0,0.04);
+  }
+  
+  .all-posts-list li:last-child {
+    border-bottom: none;
+  }
+  
+  .all-posts-list a {
+    color: var(--muted-light);
+    text-decoration: none;
+    display: block;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  
+  .all-posts-list a:hover {
+    color: var(--accent-light);
+    padding-left: 4px;
+  }
+  
+  .all-posts-list small {
+    font-size: 11px;
+    color: rgba(0,0,0,0.45);
+    margin-left: 4px;
+  }
+  
+  /* Scrollbar styling */
+  .all-posts-section::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .all-posts-section::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.03);
+    border-radius: 3px;
+  }
+  
+  .all-posts-section::-webkit-scrollbar-thumb {
+    background: rgba(0,107,79,0.2);
+    border-radius: 3px;
+  }
+  
+  .all-posts-section::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,107,79,0.4);
   }
   
   /* Footer and links */
@@ -462,6 +540,10 @@
       max-width: 100%;
       overflow-x: auto;
     }
+    
+    .all-posts-section {
+      max-height: 150px;
+    }
   }
   
   @media (max-width: 480px) {
@@ -514,6 +596,14 @@
       max-width: calc(100% - 8px);
     }
     
+    .sidebar h3 {
+      font-size: 16px;
+    }
+    
+    .all-posts-section {
+      max-height: 120px;
+    }
+    
     /* Force everything to fit */
     * {
       max-width: 100%;
@@ -554,6 +644,13 @@
         <div class="top-post">Loading...</div>
       </div>
       
+      <h3 style="margin-top: 24px;">All Posts</h3>
+      <div class="all-posts-section">
+        <ul class="all-posts-list" id="all-posts-list">
+          <li>Loading all posts...</li>
+        </ul>
+      </div>
+      
       <div style="margin-top:16px">
         <div class="tiny">Quick Links</div>
         <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
@@ -584,6 +681,7 @@
     const postsContainer = document.getElementById('posts');
     const latestPosts = document.getElementById('latest-posts');
     const topPostsContainer = document.getElementById('top-posts');
+    const allPostsList = document.getElementById('all-posts-list');
     const moreBtn = document.getElementById('more-btn');
     let allPosts = [];
     let visiblePosts = 3;
@@ -599,25 +697,34 @@
         postsContainer.innerHTML = '';
         latestPosts.innerHTML = '';
         topPostsContainer.innerHTML = '';
+        allPostsList.innerHTML = '';
         
         // Show latest posts in sidebar (always newest 3)
         allPosts.slice(0, 3).forEach(p => {
           const li = document.createElement('li');
-          li.innerHTML = `<a href="#post-${p.file.split('/').pop().replace('.md', '')}">${p.title}</a><small>${p.date}</small>`;
+          const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
+          li.innerHTML = `<a href="#${postId}" data-post-id="${postId}">${p.title}</a><small>${p.date}</small>`;
           latestPosts.appendChild(li);
         });
         
         // Show top posts (same as latest posts, but with better styling)
-        // You can modify this to have different logic for "top" vs "latest"
-        // For now, using most recent 3 posts for both sections
         allPosts.slice(0, 3).forEach(p => {
           const div = document.createElement('div');
           div.className = 'top-post';
+          const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
           div.innerHTML = `
-            <a href="#post-${p.file.split('/').pop().replace('.md', '')}">${p.title}</a>
+            <a href="#${postId}" data-post-id="${postId}">${p.title}</a>
             <small>${p.date}</small>
           `;
           topPostsContainer.appendChild(div);
+        });
+        
+        // Show all posts in reverse chronological order
+        allPosts.forEach(p => {
+          const li = document.createElement('li');
+          const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
+          li.innerHTML = `<a href="#${postId}" data-post-id="${postId}">${p.title}</a><small>${p.date}</small>`;
+          allPostsList.appendChild(li);
         });
         
         // Load initial posts (newest first)
@@ -635,6 +742,9 @@
             moreBtn.disabled = true;
           }
         });
+        
+        // Add click handlers to all sidebar links
+        setupSidebarClickHandlers();
       })
       .catch(err => {
         console.error('Error loading posts:', err);
@@ -658,7 +768,8 @@
           .then(text => {
             const article = document.createElement('article');
             article.className = 'post';
-            article.id = `post-${p.file.split('/').pop().replace('.md', '')}`;
+            const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
+            article.id = postId;
             
             // Convert markdown to HTML
             const htmlContent = marked.parse(text);
@@ -679,6 +790,8 @@
             console.error('Error loading post:', p.file, err);
             const article = document.createElement('article');
             article.className = 'post';
+            const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
+            article.id = postId;
             article.innerHTML = `
               <h2 class="post-title">${p.title}</h2>
               <div class="post-meta">By ${p.author} — ${p.date}</div>
@@ -690,39 +803,78 @@
       });
     }
 
-    // Smooth scroll to anchor links - FIXED VERSION
-    document.addEventListener('click', function(e) {
-      // Handle links in sidebar
-      if (e.target.tagName === 'A' && e.target.getAttribute('href')?.startsWith('#')) {
-        e.preventDefault();
-        const targetId = e.target.getAttribute('href').substring(1);
-        const targetElement = document.getElementById(targetId);
-        if (targetElement) {
-          window.scrollTo({
-            top: targetElement.offsetTop - 20,
-            behavior: 'smooth'
-          });
+    function setupSidebarClickHandlers() {
+      // Add click handlers to all sidebar links
+      document.addEventListener('click', function(e) {
+        // Check if clicked element is a sidebar link or inside a sidebar link
+        let target = e.target;
+        
+        // If clicked on small text inside link, get the parent link
+        if (target.tagName === 'SMALL' && target.parentElement.tagName === 'A') {
+          target = target.parentElement;
         }
-      }
-      
-      // Handle links in top posts
-      if (e.target.closest('.top-post') && e.target.tagName === 'A' && e.target.getAttribute('href')?.startsWith('#')) {
-        e.preventDefault();
-        const targetId = e.target.getAttribute('href').substring(1);
-        const targetElement = document.getElementById(targetId);
-        if (targetElement) {
-          window.scrollTo({
-            top: targetElement.offsetTop - 20,
-            behavior: 'smooth'
-          });
+        
+        // If clicked on link itself
+        if (target.tagName === 'A' && target.hasAttribute('data-post-id')) {
+          e.preventDefault();
+          const postId = target.getAttribute('data-post-id');
+          scrollToPost(postId);
         }
+        
+        // If clicked on top-post div (not the link inside)
+        if (target.classList.contains('top-post')) {
+          e.preventDefault();
+          const link = target.querySelector('a');
+          if (link && link.hasAttribute('data-post-id')) {
+            const postId = link.getAttribute('data-post-id');
+            scrollToPost(postId);
+          }
+        }
+        
+        // If clicked on small text inside top-post
+        if (target.tagName === 'SMALL' && target.parentElement.classList.contains('top-post')) {
+          e.preventDefault();
+          const link = target.parentElement.querySelector('a');
+          if (link && link.hasAttribute('data-post-id')) {
+            const postId = link.getAttribute('data-post-id');
+            scrollToPost(postId);
+          }
+        }
+        
+        // If clicked on li in all-posts-list
+        if (target.tagName === 'LI' && target.parentElement.classList.contains('all-posts-list')) {
+          e.preventDefault();
+          const link = target.querySelector('a');
+          if (link && link.hasAttribute('data-post-id')) {
+            const postId = link.getAttribute('data-post-id');
+            scrollToPost(postId);
+          }
+        }
+      });
+    }
+
+    function scrollToPost(postId) {
+      const targetElement = document.getElementById(postId);
+      if (targetElement) {
+        // Highlight the post briefly
+        const originalBg = targetElement.style.backgroundColor;
+        targetElement.style.backgroundColor = 'rgba(0,107,79,0.05)';
+        setTimeout(() => {
+          targetElement.style.backgroundColor = originalBg;
+        }, 1000);
+        
+        // Scroll to the post
+        window.scrollTo({
+          top: targetElement.offsetTop - 20,
+          behavior: 'smooth'
+        });
       }
-    });
+    }
 
     // Highlight current post in sidebar when scrolling
     window.addEventListener('scroll', function() {
       const posts = document.querySelectorAll('.post');
-      const sidebarLinks = document.querySelectorAll('.sidebar a');
+      const sidebarLinks = document.querySelectorAll('.sidebar a[data-post-id]');
       
       let currentPost = null;
       
@@ -736,16 +888,18 @@
       // Remove active class from all links
       sidebarLinks.forEach(link => {
         link.classList.remove('active');
+        link.style.color = '';
+        link.style.fontWeight = '';
       });
       
       // Add active class to current post link
       if (currentPost) {
-        const currentLink = document.querySelector(`.sidebar a[href="#${currentPost}"]`);
-        if (currentLink) {
-          currentLink.classList.add('active');
-          currentLink.style.color = 'var(--accent-light)';
-          currentLink.style.fontWeight = '900';
-        }
+        const currentLinks = document.querySelectorAll(`.sidebar a[data-post-id="${currentPost}"]`);
+        currentLinks.forEach(link => {
+          link.classList.add('active');
+          link.style.color = 'var(--accent-light)';
+          link.style.fontWeight = '900';
+        });
       }
     });
   </script>
