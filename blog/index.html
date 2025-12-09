@@ -418,7 +418,6 @@
     font-weight: 900;
     padding: 4px 0;
     border-bottom: 1px dashed rgba(0,0,0,0.04);
-    cursor: pointer;
   }
   
   .all-posts-list li:hover {
@@ -464,14 +463,6 @@
   
   .all-posts-section::-webkit-scrollbar-thumb:hover {
     background: rgba(0,107,79,0.4);
-  }
-  
-  /* Loading indicator */
-  .loading-post {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--accent-light);
-    font-weight: 900;
   }
   
   /* Footer and links */
@@ -697,7 +688,6 @@
     const moreBtn = document.getElementById('more-btn');
     let allPosts = [];
     let visiblePosts = 3;
-    let loadedPosts = {}; // Track which posts are already loaded
 
     // Fetch post list from posts.json
     fetch('posts.json')
@@ -712,11 +702,11 @@
         topPostsContainer.innerHTML = '';
         allPostsList.innerHTML = '';
         
-        // Show latest posts in sidebar (always newest 3)
+        // Show latest posts in sidebar (always newest 3) - WITH DIRECT LINKS
         allPosts.slice(0, 3).forEach(p => {
           const li = document.createElement('li');
-          const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
-          li.innerHTML = `<a href="#" data-post-file="${p.file}" data-post-id="${postId}">${p.title}</a><small>${p.date}</small>`;
+          const postSlug = p.file.split('/').pop().replace('.md', '');
+          li.innerHTML = `<a href="${p.file}" data-post-id="post-${postSlug}">${p.title}</a><small>${p.date}</small>`;
           latestPosts.appendChild(li);
         });
         
@@ -724,19 +714,19 @@
         allPosts.slice(0, 3).forEach(p => {
           const div = document.createElement('div');
           div.className = 'top-post';
-          const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
+          const postSlug = p.file.split('/').pop().replace('.md', '');
           div.innerHTML = `
-            <a href="#" data-post-file="${p.file}" data-post-id="${postId}">${p.title}</a>
+            <a href="${p.file}" data-post-id="post-${postSlug}">${p.title}</a>
             <small>${p.date}</small>
           `;
           topPostsContainer.appendChild(div);
         });
         
-        // Show all posts in reverse chronological order
+        // Show all posts in reverse chronological order - WITH DIRECT LINKS
         allPosts.forEach(p => {
           const li = document.createElement('li');
-          const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
-          li.innerHTML = `<a href="#" data-post-file="${p.file}" data-post-id="${postId}">${p.title}</a><small>${p.date}</small>`;
+          const postSlug = p.file.split('/').pop().replace('.md', '');
+          li.innerHTML = `<a href="${p.file}" data-post-id="post-${postSlug}">${p.title}</a><small>${p.date}</small>`;
           allPostsList.appendChild(li);
         });
         
@@ -755,9 +745,6 @@
             moreBtn.disabled = true;
           }
         });
-        
-        // Add click handlers to all sidebar links
-        setupSidebarClickHandlers();
       })
       .catch(err => {
         console.error('Error loading posts:', err);
@@ -776,21 +763,18 @@
 
     function loadPosts(postsToShow) {
       postsToShow.forEach(p => {
-        // Only load if not already loaded
-        if (!loadedPosts[p.file]) {
-          fetchPost(p.file, p);
-        }
+        fetchPost(p);
       });
     }
 
-    function fetchPost(filePath, postData) {
-      fetch(filePath)
+    function fetchPost(postData) {
+      fetch(postData.file)
         .then(r => r.text())
         .then(text => {
           const article = document.createElement('article');
           article.className = 'post';
-          const postId = `post-${filePath.split('/').pop().replace('.md', '')}`;
-          article.id = postId;
+          const postSlug = postData.file.split('/').pop().replace('.md', '');
+          article.id = `post-${postSlug}`;
           
           // Convert markdown to HTML
           const htmlContent = marked.parse(text);
@@ -807,128 +791,111 @@
           `;
           
           // Check if post already exists in DOM
-          const existingPost = document.getElementById(postId);
+          const existingPost = document.getElementById(article.id);
           if (existingPost) {
             existingPost.replaceWith(article);
           } else {
             postsContainer.appendChild(article);
           }
-          
-          // Mark as loaded
-          loadedPosts[filePath] = true;
         })
         .catch(err => {
-          console.error('Error loading post:', filePath, err);
+          console.error('Error loading post:', postData.file, err);
           const article = document.createElement('article');
           article.className = 'post';
-          const postId = `post-${filePath.split('/').pop().replace('.md', '')}`;
-          article.id = postId;
+          const postSlug = postData.file.split('/').pop().replace('.md', '');
+          article.id = `post-${postSlug}`;
           article.innerHTML = `
             <h2 class="post-title">${postData.title}</h2>
             <div class="post-meta">By ${postData.author} — ${postData.date}</div>
-            <div class="post-content">Error loading this post. Please check if the markdown file exists.</div>
+            <div class="post-content">Error loading this post. Please check if the markdown file exists at: ${postData.file}</div>
             <div class="hashtags">${postData.hashtags}</div>
           `;
           
-          const existingPost = document.getElementById(postId);
+          const existingPost = document.getElementById(article.id);
           if (existingPost) {
             existingPost.replaceWith(article);
           } else {
             postsContainer.appendChild(article);
           }
-          
-          loadedPosts[filePath] = true;
         });
     }
 
-    function setupSidebarClickHandlers() {
-      // Add click handlers to all sidebar links
-      document.addEventListener('click', function(e) {
-        let target = e.target;
-        let postFile = null;
-        let postId = null;
+    // Handle clicks on sidebar links - they should navigate to the post
+    document.addEventListener('click', function(e) {
+      let target = e.target;
+      
+      // If clicked on a sidebar link
+      if (target.tagName === 'A' && target.hasAttribute('href') && !target.classList.contains('link')) {
+        const href = target.getAttribute('href');
         
-        // Find the clicked post data
-        if (target.tagName === 'A' && target.hasAttribute('data-post-file')) {
-          postFile = target.getAttribute('data-post-file');
-          postId = target.getAttribute('data-post-id');
-        } else if (target.classList.contains('top-post')) {
-          const link = target.querySelector('a');
-          if (link) {
-            postFile = link.getAttribute('data-post-file');
-            postId = link.getAttribute('data-post-id');
-          }
-        } else if (target.tagName === 'LI' && target.parentElement.classList.contains('all-posts-list')) {
-          const link = target.querySelector('a');
-          if (link) {
-            postFile = link.getAttribute('data-post-file');
-            postId = link.getAttribute('data-post-id');
-          }
-        } else if (target.tagName === 'SMALL') {
-          // Clicked on date, find parent link
-          const parent = target.parentElement;
-          if (parent.tagName === 'A' && parent.hasAttribute('data-post-file')) {
-            postFile = parent.getAttribute('data-post-file');
-            postId = parent.getAttribute('data-post-id');
-          } else if (parent.classList.contains('top-post')) {
-            const link = parent.querySelector('a');
-            if (link) {
-              postFile = link.getAttribute('data-post-file');
-              postId = link.getAttribute('data-post-id');
-            }
-          } else if (parent.tagName === 'LI') {
-            const link = parent.querySelector('a');
-            if (link) {
-              postFile = link.getAttribute('data-post-file');
-              postId = link.getAttribute('data-post-id');
-            }
-          }
-        }
-        
-        // If we found a post to load
-        if (postFile && postId) {
+        // Check if it's a markdown file link (not external link)
+        if (href.endsWith('.md')) {
           e.preventDefault();
           
           // Find the post data
-          const postData = allPosts.find(p => p.file === postFile);
+          const postData = allPosts.find(p => p.file === href);
           if (!postData) return;
           
-          // Show loading indicator
-          const loadingDiv = document.createElement('div');
-          loadingDiv.className = 'post loading-post';
-          loadingDiv.id = postId;
-          loadingDiv.innerHTML = `<div>Loading post...</div>`;
+          // Check if post is already loaded
+          const postSlug = href.split('/').pop().replace('.md', '');
+          const postElement = document.getElementById(`post-${postSlug}`);
           
-          const existingPost = document.getElementById(postId);
-          if (existingPost) {
-            existingPost.replaceWith(loadingDiv);
+          if (postElement) {
+            // Post is already loaded, scroll to it
+            window.scrollTo({
+              top: postElement.offsetTop - 20,
+              behavior: 'smooth'
+            });
+            
+            // Highlight briefly
+            const originalBg = postElement.style.backgroundColor;
+            postElement.style.backgroundColor = 'rgba(0,107,79,0.05)';
+            setTimeout(() => {
+              postElement.style.backgroundColor = originalBg;
+            }, 1000);
           } else {
-            postsContainer.prepend(loadingDiv);
+            // Post not loaded yet, load it
+            fetchPost(postData);
+            
+            // Wait a bit for the post to load, then scroll to it
+            setTimeout(() => {
+              const newPostElement = document.getElementById(`post-${postSlug}`);
+              if (newPostElement) {
+                window.scrollTo({
+                  top: newPostElement.offsetTop - 20,
+                  behavior: 'smooth'
+                });
+                
+                // Highlight briefly
+                const originalBg = newPostElement.style.backgroundColor;
+                newPostElement.style.backgroundColor = 'rgba(0,107,79,0.05)';
+                setTimeout(() => {
+                  newPostElement.style.backgroundColor = originalBg;
+                }, 1000);
+              }
+            }, 300);
           }
-          
-          // Load the post
-          fetchPost(postFile, postData);
-          
-          // Scroll to the post after a short delay (to allow loading)
-          setTimeout(() => {
-            const targetElement = document.getElementById(postId);
-            if (targetElement) {
-              window.scrollTo({
-                top: targetElement.offsetTop - 20,
-                behavior: 'smooth'
-              });
-              
-              // Highlight briefly
-              const originalBg = targetElement.style.backgroundColor;
-              targetElement.style.backgroundColor = 'rgba(0,107,79,0.05)';
-              setTimeout(() => {
-                targetElement.style.backgroundColor = originalBg;
-              }, 1000);
-            }
-          }, 300);
         }
-      });
-    }
+      }
+      
+      // Handle clicks on top-post divs
+      if (target.classList.contains('top-post')) {
+        const link = target.querySelector('a');
+        if (link) {
+          e.preventDefault();
+          link.click();
+        }
+      }
+      
+      // Handle clicks on list items in all-posts
+      if (target.tagName === 'LI' && target.parentElement.classList.contains('all-posts-list')) {
+        const link = target.querySelector('a');
+        if (link) {
+          e.preventDefault();
+          link.click();
+        }
+      }
+    });
 
     // Highlight current post in sidebar when scrolling
     window.addEventListener('scroll', function() {
