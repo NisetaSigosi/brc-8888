@@ -1,39 +1,49 @@
+### Understanding mint_rules in BRC-8888: Detailed Breakdown
+
 In the BRC-8888 protocol, `mint_rules` is a key object defined during the deploy operation. It enforces fair-launch mechanics for minting new units of an object (e.g., tokens like UNQ). This ensures controlled distribution, prevents abuse (like sniping), and promotes equitable access. The rules are validated off-chain by indexers, making them mandatory for any valid mint inscription. Below, I break down each field in detail, with examples from the genesis UNQ deploy.
 
 #### Structure of mint_rules
 `mint_rules` is an optional JSON object in the deploy inscription (under the deploy op). If omitted, mints are unrestricted except for total supply. All values are strings or integers for precision.
 
 ```json
-"mint_rules": {
-  "user_cap": "integer_string",        // Max per address (e.g., "10000")
-  "exempt_addrs": [                    // Array of founder/special exemptions
-    {
-      "address": "bc1p...",
-      "role": "string",                // e.g., "founder"
-      "amount": "integer_string",      // Exempt qty (e.g., "1000000")
-      "vesting": {                     // Optional linear vesting
-        "type": "linear",
-        "start": "ISO8601",            // e.g., "2025-11-18T00:00:00Z"
-        "cliff_days": integer,         // Days before unlock starts
-        "duration_days": integer,      // Total vesting period
-        "unlock_period": "monthly"     // Payout frequency
-      },
-      "lock_conditions": {             // Optional locks
-        "lock_until_public_minted": "integer_string"  // e.g., "20000000"
+{
+  "mint_rules": {
+    "user_cap": "integer_string",
+    "exempt_addrs": [
+      {
+        "address": "bc1p...",
+        "role": "string",
+        "amount": "integer_string",
+        "vesting": {
+          "type": "linear",
+          "start": "ISO8601",
+          "cliff_days": integer,
+          "duration_days": integer,
+          "unlock_period": "monthly"
+        },
+        "lock_conditions": {
+          "lock_until_public_minted": "integer_string"
+        }
       }
-    }
-  ],
-  "cooldown_blocks": integer,          // Blocks between mints per address
-  "phases": [                          // Array of pricing tiers
-    {
-      "start_minted": "integer_string",  // Start after this total minted
-      "end_minted": "integer_string",    // End before this total minted
-      "price_sats": integer,             // Fixed sats per unit
-      "perks": "string"                  // Optional benefits (e.g., "AI traits")
-    }
-  ]
+    ],
+    "cooldown_blocks": integer,
+    "phases": [
+      {
+        "start_minted": "integer_string",
+        "end_minted": "integer_string",
+        "price_sats": integer,
+        "perks": "string"
+      }
+    ]
+  }
 }
 ```
+
+**Field Descriptions:**
+- `user_cap`: "integer_string" - Max per address (e.g., "10000")
+- `exempt_addrs`: Array of founder/special exemptions
+- `cooldown_blocks`: integer - Blocks between mints per address
+- `phases`: Array of pricing tiers
 
 #### Field-by-Field Explanation
 
