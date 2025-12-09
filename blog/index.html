@@ -418,6 +418,11 @@
     font-weight: 900;
     padding: 4px 0;
     border-bottom: 1px dashed rgba(0,0,0,0.04);
+    cursor: pointer;
+  }
+  
+  .all-posts-list li:hover {
+    background: rgba(0,0,0,0.02);
   }
   
   .all-posts-list li:last-child {
@@ -434,7 +439,6 @@
   
   .all-posts-list a:hover {
     color: var(--accent-light);
-    padding-left: 4px;
   }
   
   .all-posts-list small {
@@ -460,6 +464,14 @@
   
   .all-posts-section::-webkit-scrollbar-thumb:hover {
     background: rgba(0,107,79,0.4);
+  }
+  
+  /* Loading indicator */
+  .loading-post {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--accent-light);
+    font-weight: 900;
   }
   
   /* Footer and links */
@@ -685,6 +697,7 @@
     const moreBtn = document.getElementById('more-btn');
     let allPosts = [];
     let visiblePosts = 3;
+    let loadedPosts = {}; // Track which posts are already loaded
 
     // Fetch post list from posts.json
     fetch('posts.json')
@@ -703,7 +716,7 @@
         allPosts.slice(0, 3).forEach(p => {
           const li = document.createElement('li');
           const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
-          li.innerHTML = `<a href="#${postId}" data-post-id="${postId}">${p.title}</a><small>${p.date}</small>`;
+          li.innerHTML = `<a href="#" data-post-file="${p.file}" data-post-id="${postId}">${p.title}</a><small>${p.date}</small>`;
           latestPosts.appendChild(li);
         });
         
@@ -713,7 +726,7 @@
           div.className = 'top-post';
           const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
           div.innerHTML = `
-            <a href="#${postId}" data-post-id="${postId}">${p.title}</a>
+            <a href="#" data-post-file="${p.file}" data-post-id="${postId}">${p.title}</a>
             <small>${p.date}</small>
           `;
           topPostsContainer.appendChild(div);
@@ -723,12 +736,12 @@
         allPosts.forEach(p => {
           const li = document.createElement('li');
           const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
-          li.innerHTML = `<a href="#${postId}" data-post-id="${postId}">${p.title}</a><small>${p.date}</small>`;
+          li.innerHTML = `<a href="#" data-post-file="${p.file}" data-post-id="${postId}">${p.title}</a><small>${p.date}</small>`;
           allPostsList.appendChild(li);
         });
         
         // Load initial posts (newest first)
-        loadPosts();
+        loadInitialPosts();
         
         // More button functionality
         if (allPosts.length <= 3) {
@@ -736,7 +749,7 @@
         }
         moreBtn.addEventListener('click', () => {
           visiblePosts = Math.min(visiblePosts + 3, allPosts.length);
-          loadPosts();
+          loadPosts(allPosts.slice(0, visiblePosts));
           if (visiblePosts >= allPosts.length) {
             moreBtn.textContent = 'All posts loaded';
             moreBtn.disabled = true;
@@ -756,119 +769,165 @@
         `;
       });
 
-    function loadPosts() {
+    function loadInitialPosts() {
       const postsToShow = allPosts.slice(0, visiblePosts);
-      
-      // Clear and reload posts
-      postsContainer.innerHTML = '';
-      
+      loadPosts(postsToShow);
+    }
+
+    function loadPosts(postsToShow) {
       postsToShow.forEach(p => {
-        fetch(p.file)
-          .then(r => r.text())
-          .then(text => {
-            const article = document.createElement('article');
-            article.className = 'post';
-            const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
-            article.id = postId;
-            
-            // Convert markdown to HTML
-            const htmlContent = marked.parse(text);
-            
-            article.innerHTML = `
-              <h2 class="post-title">${p.title}</h2>
-              <div class="post-meta">By ${p.author} — ${p.date}</div>
-              <div class="post-content">${htmlContent}</div>
-              <div class="hashtags">${p.hashtags}</div>
-              <div class="share-buttons">
-                <a class="share-btn" href="https://x.com/intent/tweet?text=${encodeURIComponent(p.title + ' — BRC-8888 Update by Niseta Sigosi')}&url=${encodeURIComponent(window.location.origin + window.location.pathname + '#' + article.id)}" target="_blank">Share on X</a>
-                <button class="copy-btn share-btn" onclick="navigator.clipboard.writeText(window.location.origin + window.location.pathname + '#' + '${article.id}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Link', 2000);">Copy Link</button>
-              </div>
-            `;
-            postsContainer.appendChild(article);
-          })
-          .catch(err => {
-            console.error('Error loading post:', p.file, err);
-            const article = document.createElement('article');
-            article.className = 'post';
-            const postId = `post-${p.file.split('/').pop().replace('.md', '')}`;
-            article.id = postId;
-            article.innerHTML = `
-              <h2 class="post-title">${p.title}</h2>
-              <div class="post-meta">By ${p.author} — ${p.date}</div>
-              <div class="post-content">Error loading this post. Please check if the markdown file exists.</div>
-              <div class="hashtags">${p.hashtags}</div>
-            `;
-            postsContainer.appendChild(article);
-          });
+        // Only load if not already loaded
+        if (!loadedPosts[p.file]) {
+          fetchPost(p.file, p);
+        }
       });
+    }
+
+    function fetchPost(filePath, postData) {
+      fetch(filePath)
+        .then(r => r.text())
+        .then(text => {
+          const article = document.createElement('article');
+          article.className = 'post';
+          const postId = `post-${filePath.split('/').pop().replace('.md', '')}`;
+          article.id = postId;
+          
+          // Convert markdown to HTML
+          const htmlContent = marked.parse(text);
+          
+          article.innerHTML = `
+            <h2 class="post-title">${postData.title}</h2>
+            <div class="post-meta">By ${postData.author} — ${postData.date}</div>
+            <div class="post-content">${htmlContent}</div>
+            <div class="hashtags">${postData.hashtags}</div>
+            <div class="share-buttons">
+              <a class="share-btn" href="https://x.com/intent/tweet?text=${encodeURIComponent(postData.title + ' — BRC-8888 Update by Niseta Sigosi')}&url=${encodeURIComponent(window.location.origin + window.location.pathname + '#' + article.id)}" target="_blank">Share on X</a>
+              <button class="copy-btn share-btn" onclick="navigator.clipboard.writeText(window.location.origin + window.location.pathname + '#' + '${article.id}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Link', 2000);">Copy Link</button>
+            </div>
+          `;
+          
+          // Check if post already exists in DOM
+          const existingPost = document.getElementById(postId);
+          if (existingPost) {
+            existingPost.replaceWith(article);
+          } else {
+            postsContainer.appendChild(article);
+          }
+          
+          // Mark as loaded
+          loadedPosts[filePath] = true;
+        })
+        .catch(err => {
+          console.error('Error loading post:', filePath, err);
+          const article = document.createElement('article');
+          article.className = 'post';
+          const postId = `post-${filePath.split('/').pop().replace('.md', '')}`;
+          article.id = postId;
+          article.innerHTML = `
+            <h2 class="post-title">${postData.title}</h2>
+            <div class="post-meta">By ${postData.author} — ${postData.date}</div>
+            <div class="post-content">Error loading this post. Please check if the markdown file exists.</div>
+            <div class="hashtags">${postData.hashtags}</div>
+          `;
+          
+          const existingPost = document.getElementById(postId);
+          if (existingPost) {
+            existingPost.replaceWith(article);
+          } else {
+            postsContainer.appendChild(article);
+          }
+          
+          loadedPosts[filePath] = true;
+        });
     }
 
     function setupSidebarClickHandlers() {
       // Add click handlers to all sidebar links
       document.addEventListener('click', function(e) {
-        // Check if clicked element is a sidebar link or inside a sidebar link
         let target = e.target;
+        let postFile = null;
+        let postId = null;
         
-        // If clicked on small text inside link, get the parent link
-        if (target.tagName === 'SMALL' && target.parentElement.tagName === 'A') {
-          target = target.parentElement;
-        }
-        
-        // If clicked on link itself
-        if (target.tagName === 'A' && target.hasAttribute('data-post-id')) {
-          e.preventDefault();
-          const postId = target.getAttribute('data-post-id');
-          scrollToPost(postId);
-        }
-        
-        // If clicked on top-post div (not the link inside)
-        if (target.classList.contains('top-post')) {
-          e.preventDefault();
+        // Find the clicked post data
+        if (target.tagName === 'A' && target.hasAttribute('data-post-file')) {
+          postFile = target.getAttribute('data-post-file');
+          postId = target.getAttribute('data-post-id');
+        } else if (target.classList.contains('top-post')) {
           const link = target.querySelector('a');
-          if (link && link.hasAttribute('data-post-id')) {
-            const postId = link.getAttribute('data-post-id');
-            scrollToPost(postId);
+          if (link) {
+            postFile = link.getAttribute('data-post-file');
+            postId = link.getAttribute('data-post-id');
           }
-        }
-        
-        // If clicked on small text inside top-post
-        if (target.tagName === 'SMALL' && target.parentElement.classList.contains('top-post')) {
-          e.preventDefault();
-          const link = target.parentElement.querySelector('a');
-          if (link && link.hasAttribute('data-post-id')) {
-            const postId = link.getAttribute('data-post-id');
-            scrollToPost(postId);
-          }
-        }
-        
-        // If clicked on li in all-posts-list
-        if (target.tagName === 'LI' && target.parentElement.classList.contains('all-posts-list')) {
-          e.preventDefault();
+        } else if (target.tagName === 'LI' && target.parentElement.classList.contains('all-posts-list')) {
           const link = target.querySelector('a');
-          if (link && link.hasAttribute('data-post-id')) {
-            const postId = link.getAttribute('data-post-id');
-            scrollToPost(postId);
+          if (link) {
+            postFile = link.getAttribute('data-post-file');
+            postId = link.getAttribute('data-post-id');
           }
+        } else if (target.tagName === 'SMALL') {
+          // Clicked on date, find parent link
+          const parent = target.parentElement;
+          if (parent.tagName === 'A' && parent.hasAttribute('data-post-file')) {
+            postFile = parent.getAttribute('data-post-file');
+            postId = parent.getAttribute('data-post-id');
+          } else if (parent.classList.contains('top-post')) {
+            const link = parent.querySelector('a');
+            if (link) {
+              postFile = link.getAttribute('data-post-file');
+              postId = link.getAttribute('data-post-id');
+            }
+          } else if (parent.tagName === 'LI') {
+            const link = parent.querySelector('a');
+            if (link) {
+              postFile = link.getAttribute('data-post-file');
+              postId = link.getAttribute('data-post-id');
+            }
+          }
+        }
+        
+        // If we found a post to load
+        if (postFile && postId) {
+          e.preventDefault();
+          
+          // Find the post data
+          const postData = allPosts.find(p => p.file === postFile);
+          if (!postData) return;
+          
+          // Show loading indicator
+          const loadingDiv = document.createElement('div');
+          loadingDiv.className = 'post loading-post';
+          loadingDiv.id = postId;
+          loadingDiv.innerHTML = `<div>Loading post...</div>`;
+          
+          const existingPost = document.getElementById(postId);
+          if (existingPost) {
+            existingPost.replaceWith(loadingDiv);
+          } else {
+            postsContainer.prepend(loadingDiv);
+          }
+          
+          // Load the post
+          fetchPost(postFile, postData);
+          
+          // Scroll to the post after a short delay (to allow loading)
+          setTimeout(() => {
+            const targetElement = document.getElementById(postId);
+            if (targetElement) {
+              window.scrollTo({
+                top: targetElement.offsetTop - 20,
+                behavior: 'smooth'
+              });
+              
+              // Highlight briefly
+              const originalBg = targetElement.style.backgroundColor;
+              targetElement.style.backgroundColor = 'rgba(0,107,79,0.05)';
+              setTimeout(() => {
+                targetElement.style.backgroundColor = originalBg;
+              }, 1000);
+            }
+          }, 300);
         }
       });
-    }
-
-    function scrollToPost(postId) {
-      const targetElement = document.getElementById(postId);
-      if (targetElement) {
-        // Highlight the post briefly
-        const originalBg = targetElement.style.backgroundColor;
-        targetElement.style.backgroundColor = 'rgba(0,107,79,0.05)';
-        setTimeout(() => {
-          targetElement.style.backgroundColor = originalBg;
-        }, 1000);
-        
-        // Scroll to the post
-        window.scrollTo({
-          top: targetElement.offsetTop - 20,
-          behavior: 'smooth'
-        });
-      }
     }
 
     // Highlight current post in sidebar when scrolling
