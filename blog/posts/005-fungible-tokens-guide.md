@@ -50,7 +50,7 @@ Use the tool to generate and inscribe the deploy JSON. Indexers enforce your sup
 ### 4. Mint and Manage
 Post-deploy, mint units with rules; evolutions allow supply burns or adjustments, secured by post-quantum sigs.
 
-![BRC-8888 u-token Explainer](https://nisetasigosi.github.io/brc-8888/images/6.jpg)
+![BRC-8888 u-token Explainer](https://raw.githubusercontent.com/NisetaSigosi/brc-8888/main/images/6.jpg)
 
 ## Example u-token Deploy JSON
 
