@@ -34,7 +34,7 @@ Built-in `mint_rules` for caps, cooldowns, and phases prevent abuse, with stats 
 
 These strengths make `u-token` ideal for projects integrating with BRC-2.0 upgrades or Runes, all while leveraging Bitcoin's security for inscription stats.
 
-![u-token Workflow Diagram](https://nisetasigosi.github.io/brc-8888/images/5.jpg)
+![u-token Workflow Diagram](https://raw.githubusercontent.com/NisetaSigosi/brc-8888/main/images/5.jpg)
 
 ## Step-by-Step: Creating a `u-token` on BRC-8888
 
