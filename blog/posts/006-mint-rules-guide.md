@@ -1,6 +1,4 @@
-### Understanding mint_rules in BRC-8888: Detailed Breakdown
-
-In the BRC-8888 protocol, `mint_rules` is a key object defined during the deploy operation. It enforces fair-launch mechanics for minting new units of an object (e.g., tokens like UNQ). This ensures controlled distribution, prevents abuse (like sniping), and promotes equitable access. The rules are validated off-chain by indexers, making them mandatory for any valid mint inscription. Below, I break down each field in detail, with examples from the genesis UNQ deploy.
+**December 09, 2025** - In the BRC-8888 protocol, `mint_rules` is a key object defined during the deploy operation. It enforces fair-launch mechanics for minting new units of an object (e.g., tokens like UNQ). This ensures controlled distribution, prevents abuse (like sniping), and promotes equitable access. The rules are validated off-chain by indexers, making them mandatory for any valid mint inscription. Below, I break down each field in detail, with examples from the genesis UNQ deploy.
 
 #### Structure of mint_rules
 `mint_rules` is an optional JSON object in the deploy inscription (under the deploy op). If omitted, mints are unrestricted except for total supply. All values are strings or integers for precision.
