@@ -1,6 +1,6 @@
 ![BRC-8888 Quantum Shield](https://raw.githubusercontent.com/NisetaSigosi/brc-8888/main/images/1.webp)
 
-**December 15, 2025** - Today marks the official public introduction of **BRC-8888**, the first Bitcoin-native protocol that brings true stateful, evolvable, and post-quantum-secure digital objects directly on top of Ordinals inscriptions — without sidechains, wrapped tokens, or consensus changes.
+**December 08, 2025** - Today marks the official public introduction of **BRC-8888**, the first Bitcoin-native protocol that brings true stateful, evolvable, and post-quantum-secure digital objects directly on top of Ordinals inscriptions — without sidechains, wrapped tokens, or consensus changes.
 
 While BRC-20 and Runes gave Bitcoin fungible tokens and efficient UTXOs, they remain **static**. Once deployed, their rules are frozen forever.
 
