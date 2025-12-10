@@ -1,4 +1,4 @@
-**December 12, 2025** — While BRC-20 and Runes dominate fungible tokens, and traditional Ordinals NFTs remain static, **BRC-8888 introduces the first truly evolvable NFT standard on Bitcoin** using the `u-nft` object type. These are not just collectibles — they are living digital assets that can upgrade traits, unlock new metadata, respond to on-chain triggers, and survive the quantum computing era with Dilithium3 post-quantum signatures.
+**December 09, 2025** — While BRC-20 and Runes dominate fungible tokens, and traditional Ordinals NFTs remain static, **BRC-8888 introduces the first truly evolvable NFT standard on Bitcoin** using the `u-nft` object type. These are not just collectibles — they are living digital assets that can upgrade traits, unlock new metadata, respond to on-chain triggers, and survive the quantum computing era with Dilithium3 post-quantum signatures.
 
 This is the guide every NFT creator has been waiting for.
 
