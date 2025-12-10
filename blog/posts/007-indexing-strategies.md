@@ -1,5 +1,3 @@
-### Strategies for Indexing BRC-8888: Efficient Implementation for Bitcoin Ordinals Developers
-
 **December 15, 2025** — As Bitcoin Ordinals inscription stats climb past 100 million and standards like BRC-20, BRC-2.0, Runes, and SATS drive ecosystem growth, indexing new protocols like BRC-8888 requires careful planning to avoid UTXO bloat and ensure scalability. BRC-8888, with its post-quantum evolvable objects and slim v1.1 payloads (100–150 bytes), offers a lean alternative for indexers seeking to support dynamic assets without the congestion issues seen in BRC-20 deployments. This guide outlines practical strategies for implementing BRC-8888 indexing, drawing from real-world Ordinals stats and lessons from Runes integration.
 
 In recent news, BRC-8888's v1.1 Slim release has optimized payloads by 40–60%, making it one of the most indexer-friendly protocols in the Bitcoin Ordinals space. This update addresses the UTXO explosion from BRC-20 (85M UTXOs since 2022) and Runes' etching efficiency, positioning BRC-8888 as a scalable choice for inscription stats tracking.
