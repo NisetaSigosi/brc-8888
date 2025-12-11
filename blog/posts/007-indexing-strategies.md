@@ -19,8 +19,6 @@ Indexing BRC-8888 isn't just about supporting another standard—it's about futu
 
 These features make BRC-8888 a natural extension for platforms already handling BRC-20 or Runes inscription stats.
 
-![BRC-8888 Indexing Workflow](https://raw.githubusercontent.com/NisetaSigosi/brc-8888/main/images/indexing-workflow.jpg)
-
 #### Core Strategies for BRC-8888 Indexing
 
 Implementing BRC-8888 indexing involves deterministic validation, efficient storage, and API endpoints. Leverage the reference Python script for a quick start, adapting for your stack (e.g., Rust for Runes compatibility).
