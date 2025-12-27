@@ -665,7 +665,7 @@ body[data-theme="light"] .phase-group {
       <div class="header-row">
         <div>
           <div class="h-title">Mint Quantum Edge (UNQ) — Genesis Object</div>
-          <div class="h-sub">Mint from the 21M supply via phased fixed price (Phase 1: 2100 sats/unit for first 10M; Phase 2: 4200 sats/unit with AI perks). Fees: 1% per tx to treasury. Sim first!</div>
+          <div class="h-sub">Mint from the 21M supply via free mint window (no phase price until first indexer). Max 2100 UNQ per wallet. Fees: 1% per tx to treasury. Sim first!</div>
         </div>
       </div>
       <div class="grid-2">
@@ -676,17 +676,17 @@ body[data-theme="light"] .phase-group {
             <div class="validation-tooltip">Minter address is required</div>
           </div>
           <div class="field">
-            <label>Quantity (1-10K cap per user)</label>
-            <input id="unq-qty" type="number" value="100" min="1" max="10000" title="Mint amount; enforced off-chain by indexers (user_cap=10000 for UNQ)." />
-            <div class="validation-tooltip">Quantity must be between 1 and 10000</div>
+            <label>Quantity (1-2100 cap per user)</label>
+            <input id="unq-qty" type="number" value="100" min="1" max="2100" title="Mint amount; enforced off-chain by indexers (user_cap=2100 for UNQ during free mint window)." />
+            <div class="validation-tooltip">Quantity must be between 1 and 2100</div>
           </div>
           <div class="field">
             <label>Phase Price per Unit (sats; informational)</label>
-            <input id="unq-price" type="number" value="2100" readonly title="Phased fixed price; Phase 1 (first 10M): 2100; Phase 2: 4200 + AI perks. Indexer computes based on total_minted." />
+            <input id="unq-price" type="number" value="0" readonly title="Free mint window active — no phase price enforced until first indexer picks up the protocol." />
           </div>
           <div class="field">
             <label>Memo/Reason (optional)</label>
-            <input id="unq-note" type="text" placeholder="Fair launch mint" title="Custom note for mint reason; stored in meta for provenance." />
+            <input id="unq-note" type="text" placeholder="Free mint window active — no phase price enforced until first indexer" title="Custom note for mint reason; stored in meta for provenance." />
           </div>
           <div class="controls">
             <button class="btn generate-json tooltip" id="gen-unq">
@@ -699,7 +699,7 @@ body[data-theme="light"] .phase-group {
             <button class="btn ghost" id="open-unisat">UniSat</button>
             <button class="btn ghost" id="open-xverse">Xverse</button>
           </div>
-          <div class="tiny" style="margin-top:10px">Phased: Indexer enforces price based on total_minted (Phase 1 up to 10M; Phase 2 remaining with perks). Sim: deploy_ledger_validation.py for exact cost + outputs.</div>
+          <div class="tiny" style="margin-top:10px">Free Mint Window: No phase price until first indexer picks up the protocol. Max 2100 UNQ per wallet. Sim: deploy_ledger_validation.py for exact cost + outputs.</div>
         </div>
         <div class="json-preview">
           <div class="tiny">Generated Mint JSON (Inscribe as Text)</div>
@@ -1480,10 +1480,9 @@ document.addEventListener('DOMContentLoaded', function() {
    
     // Generate JSON functions
     function generateUnqJson() {
-        const minter = document.getElementById('unq-minter').value.trim() || "bc1pMinterAddressPlaceholder...";
+        const minter = document.getElementById('unq-minter').value.trim() || "bc1pYourTaprootAddressHere";
         const qty = document.getElementById('unq-qty').value || "100";
-        const price = document.getElementById('unq-price').value || 2100;
-        const note = document.getElementById('unq-note').value || "Public minting UNQ units via phased fixed price";
+        const note = document.getElementById('unq-note').value || "Free mint window active — no phase price enforced until first indexer";
        
         return JSON.stringify({
             "p": "brc8888-1",
@@ -1492,21 +1491,13 @@ document.addEventListener('DOMContentLoaded', function() {
             "tick": "UNQ",
             "qty": qty,
             "minter": minter,
-            "price": {
-                "amount_sats": price,
-                "currency": "BTC",
-                "note": "Phased fixed price per unit in sats"
-            },
             "fees": {
-                "fee_type": "onchain_output",
-                "protocol_fee_percent": 1,
-                "fee_address": "bc1puez48076vx6d3lnxkgnwzahsmpvmklfcnulcq0jgu6u4dl2yhmpsjr9kq0",
-                "fee_scope": "per_tx"
+                "type": "tx_output",
+                "pct": 1
             },
             "meta": {
-                "reason": note,
-                "timestamp": new Date().toISOString(),
-                "created_by": "Niseta Sigosi"
+                "ts": 1736208000,
+                "note": note
             }
         }, null, 2);
     }
